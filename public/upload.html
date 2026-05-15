@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaloProfile — Upload Your Photos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+
+    .drop-active { border-color: #f43f5e !important; background-color: #fff1f2 !important; }
+
+    .thumb {
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      width: 100%;
+    }
+
+    #progress-bar-inner {
+      transition: width 0.3s ease;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: #fda4af; }
+      50% { border-color: #f43f5e; }
+    }
+    .drop-zone-pulse { animation: pulse-border 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+  <!-- Auth loading screen -->
+  <div id="loading-screen" class="fixed inset-0 bg-white flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="text-4xl mb-3 animate-pulse">✨</div>
+      <p class="text-sm text-gray-400 font-medium">Loading…</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PRICING MODAL (shown after upload, cannot be dismissed)
+  ============================================================ -->
+  <div id="pricing-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
+
+      <!-- Modal header -->
+      <div class="bg-gradient-to-r from-rose-500 to-orange-500 px-8 py-6 text-center">
+        <p class="text-rose-100 text-sm font-medium mb-1">🎉 Photos uploaded successfully!</p>
+        <h2 class="text-2xl font-black text-white">Choose Your Package</h2>
+        <p class="text-rose-100 text-sm mt-1">Select how many AI photos you'd like generated</p>
+
+        <!-- Gender selector -->
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <span class="text-rose-100 text-sm font-medium">Generate photos as:</span>
+          <div class="flex bg-white/20 rounded-full p-1 gap-1">
+            <button id="gender-male" onclick="setGender('male')"
+              class="px-4 py-1.5 rounded-full text-sm font-bold transition-all bg-white text-rose-600 shadow">
+              👨 Male
+            </button>
+            <button id="gender-female" onclick="setGender('female')"
+              class="px-4 py-1.5 rounded-full text-sm font-bold transition-all text-white">
+              👩 Female
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plans grid -->
+      <div class="p-8 grid md:grid-cols-3 gap-4">
+
+        <!-- Starter -->
+        <div class="relative border-2 border-gray-100 rounded-2xl p-6 hover:border-rose-200 hover:shadow-lg transition-all cursor-pointer group" id="plan-starter">
+          <div class="text-center mb-5">
+            <div class="text-3xl mb-2">🌱</div>
+            <h3 class="text-lg font-bold text-gray-900">Starter</h3>
+            <div class="mt-2">
+              <span class="text-3xl font-black text-gray-900">$9.99</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">20 AI photos</p>
+          </div>
+          <ul class="space-y-2 text-sm text-gray-600 mb-6">
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 20 styled headshots</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 5 styles included</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD download</li>
+          </ul>
+          <button onclick="selectPlan('starter')"
+            class="w-full py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-rose-400 hover:text-rose-600 group-hover:border-rose-400 group-hover:text-rose-600 transition-all text-sm">
+            Select Plan
+          </button>
+        </div>
+
+        <!-- Pro (Most Popular) -->
+        <div class="relative border-2 border-rose-500 rounded-2xl p-6 shadow-xl shadow-rose-100 bg-rose-50/30" id="plan-pro">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full">⭐ Most Popular</span>
+          </div>
+          <div class="text-center mb-5">
+            <div class="text-3xl mb-2">🔥</div>
+            <h3 class="text-lg font-bold text-gray-900">Pro</h3>
+            <div class="mt-2">
+              <span class="text-3xl font-black text-gray-900">$19.99</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">50 AI photos</p>
+          </div>
+          <ul class="space-y-2 text-sm text-gray-600 mb-6">
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 50 styled headshots</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 12 styles included</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD download</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Priority processing</li>
+          </ul>
+          <button onclick="selectPlan('pro')"
+            class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all text-sm shadow-md shadow-rose-200">
+            Select Plan
+          </button>
+        </div>
+
+        <!-- Premium -->
+        <div class="relative border-2 border-gray-100 rounded-2xl p-6 hover:border-rose-200 hover:shadow-lg transition-all cursor-pointer group" id="plan-premium">
+          <div class="text-center mb-5">
+            <div class="text-3xl mb-2">💎</div>
+            <h3 class="text-lg font-bold text-gray-900">Premium</h3>
+            <div class="mt-2">
+              <span class="text-3xl font-black text-gray-900">$34.99</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">100 AI photos</p>
+          </div>
+          <ul class="space-y-2 text-sm text-gray-600 mb-6">
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 100 styled headshots</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> All styles included</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD download</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Priority processing</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Commercial license</li>
+          </ul>
+          <button onclick="selectPlan('premium')"
+            class="w-full py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-rose-400 hover:text-rose-600 group-hover:border-rose-400 group-hover:text-rose-600 transition-all text-sm">
+            Select Plan
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Plan loading state -->
+      <div id="plan-loading" class="hidden px-8 pb-6 text-center">
+        <p class="text-sm text-gray-500 animate-pulse">Redirecting to secure checkout…</p>
+      </div>
+
+      <!-- Modal error -->
+      <div id="modal-error" class="hidden mx-8 mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg text-center"></div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAME PROMPT MODAL (shown if profile.full_name is missing)
+  ============================================================ -->
+  <div id="name-modal" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+      <div class="p-8 text-center">
+        <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+          👋
+        </div>
+        <h2 class="text-2xl font-black text-gray-900 mb-2">Welcome to HaloProfile!</h2>
+        <p class="text-gray-500 mb-8 leading-relaxed">Before we begin, what should we call you? This will be used for your AI headshot profiles.</p>
+        
+        <div class="space-y-4">
+          <div class="text-left">
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 ml-1">Your Full Name</label>
+            <input type="text" id="user-name-input" placeholder="e.g. Alex Johnson"
+              class="w-full px-5 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-rose-400 focus:bg-white outline-none transition-all font-medium text-gray-900">
+          </div>
+          
+          <button id="save-name-btn" onclick="saveUserName()"
+            class="w-full py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-base rounded-2xl
+                   shadow-xl shadow-rose-200 transition-all active:scale-95 disabled:opacity-50">
+            Get Started →
+          </button>
+        </div>
+        
+        <p id="name-error" class="hidden mt-4 text-sm text-red-500 font-medium"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MAIN CONTENT
+  ============================================================ -->
+  <div id="main-content" class="hidden">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      <a href="/" class="flex items-center gap-2">
+        <span class="text-xl">✨</span>
+        <span class="font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="/gallery.html" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">My Gallery</a>
+        <span id="user-email" class="text-sm text-gray-500 hidden sm:block"></span>
+        <button onclick="handleLogout()" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">Log out</button>
+      </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+      <!-- Page header -->
+      <div class="mb-8 text-center">
+        <h1 class="text-3xl font-black text-gray-900 mb-2">Upload Your Photos</h1>
+        <p class="text-gray-500">Upload 15–30 photos and we'll train an AI model just for you</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+
+        <!-- LEFT: Drop zone + thumbnails + counter -->
+        <div class="lg:col-span-2 space-y-5">
+
+          <!-- Drop zone -->
+          <div id="drop-zone"
+            class="drop-zone-pulse border-2 border-dashed border-rose-200 rounded-2xl p-10 text-center bg-white hover:bg-rose-50/50 transition-all cursor-pointer">
+            <input type="file" id="file-input" accept="image/*" multiple class="hidden" />
+            <div class="text-5xl mb-3">📸</div>
+            <p class="text-base font-semibold text-gray-700 mb-1">Drag & drop photos here</p>
+            <p class="text-sm text-gray-400 mb-4">JPEG, PNG, WEBP — up to 30 photos</p>
+            <span class="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 text-white text-sm font-semibold rounded-xl shadow-md shadow-rose-200 cursor-pointer">
+              Choose Photos
+            </span>
+          </div>
+
+          <!-- Photo counter badge -->
+          <div id="photo-counter"
+            class="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-5 py-3 shadow-sm">
+            <span class="text-sm font-medium text-gray-600">Photos selected</span>
+            <span id="counter-badge"
+              class="text-sm font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500">
+              0 / 15 — need 15 more
+            </span>
+          </div>
+
+          <!-- Thumbnail grid -->
+          <div id="thumb-grid" class="hidden grid grid-cols-4 sm:grid-cols-5 gap-2"></div>
+
+          <!-- Progress section -->
+          <div id="progress-section" class="hidden bg-white rounded-xl border border-gray-100 px-5 py-4 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span id="progress-label" class="text-sm font-semibold text-gray-700">Zipping photos…</span>
+              <span id="progress-pct" class="text-sm font-bold text-rose-500">0%</span>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-2">
+              <div id="progress-bar-inner" class="h-2 bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Upload button -->
+          <button id="upload-btn" disabled onclick="startUpload()"
+            class="w-full py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-base rounded-2xl
+                   shadow-xl shadow-rose-200 transition-all active:scale-95
+                   disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100">
+            Upload &amp; Continue →
+          </button>
+
+        </div>
+
+        <!-- RIGHT: Quality checklist -->
+        <div class="lg:col-span-1">
+          <div class="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm sticky top-24">
+            <h3 class="text-base font-bold text-gray-900 mb-4">📋 Photo Guidelines</h3>
+            <ul class="space-y-3 text-sm">
+              <li class="flex items-start gap-2.5">
+                <span class="text-green-500 font-bold mt-0.5">✅</span>
+                <span class="text-gray-700">Solo photos only</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-green-500 font-bold mt-0.5">✅</span>
+                <span class="text-gray-700">Face clearly visible, no sunglasses</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-green-500 font-bold mt-0.5">✅</span>
+                <span class="text-gray-700">At least 4 different angles</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-green-500 font-bold mt-0.5">✅</span>
+                <span class="text-gray-700">Different lighting conditions</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-red-400 font-bold mt-0.5">❌</span>
+                <span class="text-gray-700">No group photos</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-red-400 font-bold mt-0.5">❌</span>
+                <span class="text-gray-700">No heavy filters</span>
+              </li>
+            </ul>
+
+            <div class="mt-5 pt-5 border-t border-gray-100">
+              <p class="text-xs text-gray-400 leading-relaxed">
+                Better photos = better results. The AI learns from diversity — different outfits, backgrounds, and expressions.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { requireLogin, logout, getToken, supabase, getProfile, updateProfile } from "/js/auth.js";
+
+    const MIN = 15;
+    const MAX = 30;
+    const SUPABASE_URL = "https://pluksclbjkerwnbqfsue.supabase.co";
+
+    let selectedFiles = [];
+    let currentUploadId = null;
+    let currentSession = null;
+
+    // ─── Auth guard & Profile check ───────────────────────────
+    currentSession = await requireLogin();
+    
+    let shouldShowUI = true;
+
+    // Check if profile has completed onboarding
+    const profile = await getProfile();
+    if (!profile?.onboarding_completed) {
+      if (profile?.full_name) {
+        document.getElementById("user-name-input").value = profile.full_name;
+      }
+      document.getElementById("name-modal").classList.remove("hidden");
+    } else {
+      // If onboarding is done, check if they already have a model
+      try {
+        const token = await getToken();
+        const res = await fetch("/api/photos/credits", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.hasModel) {
+            window.location.href = "/gallery.html";
+            shouldShowUI = false;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check model status", err);
+      }
+    }
+
+    if (shouldShowUI) {
+      document.getElementById("loading-screen").classList.add("hidden");
+      document.getElementById("main-content").classList.remove("hidden");
+    }
+    
+    if (currentSession?.user?.email) {
+      document.getElementById("user-email").textContent = currentSession.user.email;
+    }
+
+    // ─── Save Name Logic ──────────────────────────────────────
+    window.saveUserName = async () => {
+      const input = document.getElementById("user-name-input");
+      const btn = document.getElementById("save-name-btn");
+      const errorEl = document.getElementById("name-error");
+      const name = input.value.trim();
+
+      if (!name) {
+        errorEl.textContent = "Please enter your name";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Saving...";
+      errorEl.classList.add("hidden");
+
+      try {
+        await updateProfile({ full_name: name, onboarding_completed: true });
+        document.getElementById("name-modal").classList.add("hidden");
+      } catch (err) {
+        console.error(err);
+        errorEl.textContent = "Failed to save name. Please try again.";
+        errorEl.classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "Get Started →";
+      }
+    };
+
+    // ─── Logout ────────────────────────────────────────────────
+    window.handleLogout = async () => {
+      await logout();
+      window.location.href = "/auth.html";
+    };
+
+    // ─── Drop zone setup ───────────────────────────────────────
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+
+    dropZone.addEventListener("click", () => fileInput.click());
+    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("drop-active"); });
+    dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drop-active"));
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("drop-active");
+      handleFiles([...e.dataTransfer.files]);
+    });
+    fileInput.addEventListener("change", () => handleFiles([...fileInput.files]));
+
+    // ─── File handling ─────────────────────────────────────────
+    function handleFiles(files) {
+      const images = files.filter(f => f.type.startsWith("image/"));
+      const combined = [...selectedFiles, ...images];
+      selectedFiles = combined.slice(0, MAX); // cap at 30
+      renderThumbs();
+      updateCounter();
+    }
+
+    function renderThumbs() {
+      const grid = document.getElementById("thumb-grid");
+      grid.innerHTML = "";
+      if (selectedFiles.length === 0) { grid.classList.add("hidden"); return; }
+      grid.classList.remove("hidden");
+
+      selectedFiles.forEach((file, i) => {
+        const url = URL.createObjectURL(file);
+        const wrapper = document.createElement("div");
+        wrapper.className = "relative group";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.className = "thumb";
+        img.alt = `Photo ${i + 1}`;
+
+        const remove = document.createElement("button");
+        remove.className = "absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 text-xs hidden group-hover:flex items-center justify-center";
+        remove.textContent = "×";
+        remove.onclick = (e) => { e.stopPropagation(); selectedFiles.splice(i, 1); renderThumbs(); updateCounter(); };
+
+        wrapper.appendChild(img);
+        wrapper.appendChild(remove);
+        grid.appendChild(wrapper);
+      });
+    }
+
+    function updateCounter() {
+      const count = selectedFiles.length;
+      const badge = document.getElementById("counter-badge");
+      const btn = document.getElementById("upload-btn");
+
+      if (count >= MIN) {
+        badge.textContent = `${count}/${MAX} ✅ Ready!`;
+        badge.className = "text-sm font-bold px-3 py-1 rounded-full bg-green-100 text-green-700";
+        btn.disabled = false;
+      } else {
+        const need = MIN - count;
+        badge.textContent = `${count}/15 — need ${need} more`;
+        badge.className = "text-sm font-bold px-3 py-1 rounded-full bg-gray-100 text-gray-500";
+        btn.disabled = true;
+      }
+    }
+
+    // ─── Upload flow ───────────────────────────────────────────
+    window.startUpload = async () => {
+      const btn = document.getElementById("upload-btn");
+      btn.disabled = true;
+      btn.textContent = "Working…";
+
+      const progressSection = document.getElementById("progress-section");
+      progressSection.classList.remove("hidden");
+
+      try {
+        // Generate upload ID client-side (uuid v4 via crypto)
+        const uploadId = crypto.randomUUID();
+        currentUploadId = uploadId;
+        const userId = currentSession.user.id;
+
+        // Step 1: Zip photos
+        setProgress("Zipping photos…", 10);
+        const zip = new JSZip();
+        selectedFiles.forEach((file, i) => {
+          const ext = file.name.split(".").pop() || "jpg";
+          zip.file(`photo_${String(i + 1).padStart(3, "0")}.${ext}`, file);
+        });
+        const blob = await zip.generateAsync({ type: "blob" }, (meta) => {
+          setProgress("Zipping photos…", 10 + Math.round(meta.percent * 0.3));
+        });
+
+        // Step 2: Upload to Supabase Storage
+        setProgress("Uploading…", 40);
+        const storagePath = `${userId}/${uploadId}/photos.zip`;
+        const token = await getToken();
+
+        const { error: storageError } = await supabase.storage
+          .from("pending-uploads")
+          .upload(storagePath, blob, {
+            contentType: "application/zip",
+            upsert: false,
+          });
+
+        if (storageError) throw new Error(`Storage upload failed: ${storageError.message}`);
+        setProgress("Uploading…", 75);
+
+        // Build public URL (it's private, so we use the signed path pattern)
+        const { data: urlData } = supabase.storage
+          .from("pending-uploads")
+          .getPublicUrl(storagePath);
+        const zipUrl = urlData?.publicUrl || `${SUPABASE_URL}/storage/v1/object/pending-uploads/${storagePath}`;
+
+        // Step 3: Notify backend
+        setProgress("Saving…", 85);
+        const res = await fetch("/api/upload/complete", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ zipUrl, photoCount: selectedFiles.length, uploadId }),
+        });
+
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Server error");
+
+        setProgress("Done! ✅", 100);
+        localStorage.setItem("haloprofile_uploadId", uploadId);
+
+        // Step 4: Redirect to sales funnel
+        await sleep(600);
+        window.location.href = "/onboarding.html";
+
+      } catch (err) {
+        console.error(err);
+        progressSection.classList.add("hidden");
+        alert(`Upload failed: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = "Upload & Continue →";
+      }
+    };
+
+    function setProgress(label, pct) {
+      document.getElementById("progress-label").textContent = label;
+      document.getElementById("progress-pct").textContent = `${pct}%`;
+      document.getElementById("progress-bar-inner").style.width = `${pct}%`;
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // ─── Gender toggle ─────────────────────────────────────────
+    let selectedGender = "male"; // default
+
+    window.setGender = (gender) => {
+      selectedGender = gender;
+      const maleBtn   = document.getElementById("gender-male");
+      const femaleBtn = document.getElementById("gender-female");
+      if (gender === "male") {
+        maleBtn.classList.add("bg-white", "text-rose-600", "shadow");
+        maleBtn.classList.remove("text-white");
+        femaleBtn.classList.remove("bg-white", "text-rose-600", "shadow");
+        femaleBtn.classList.add("text-white");
+      } else {
+        femaleBtn.classList.add("bg-white", "text-rose-600", "shadow");
+        femaleBtn.classList.remove("text-white");
+        maleBtn.classList.remove("bg-white", "text-rose-600", "shadow");
+        maleBtn.classList.add("text-white");
+      }
+    };
+
+    // ─── Plan selection ────────────────────────────────────────
+    window.selectPlan = async (plan) => {
+      const loadingEl = document.getElementById("plan-loading");
+      const errorEl = document.getElementById("modal-error");
+      errorEl.classList.add("hidden");
+      loadingEl.classList.remove("hidden");
+
+      // Disable all plan buttons
+      document.querySelectorAll("#pricing-modal button").forEach(b => b.disabled = true);
+
+      try {
+        const token = await getToken();
+        const uploadId = localStorage.getItem("haloprofile_uploadId") || currentUploadId;
+
+        const res = await fetch("/api/stripe/create-checkout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ plan, uploadId, gender: selectedGender }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Checkout failed");
+
+        window.location.href = data.checkoutUrl;
+
+      } catch (err) {
+        loadingEl.classList.add("hidden");
+        document.querySelectorAll("#pricing-modal button").forEach(b => b.disabled = false);
+        errorEl.textContent = err.message;
+        errorEl.classList.remove("hidden");
+      }
+    };
+
+  </script>
+</body>
+</html>

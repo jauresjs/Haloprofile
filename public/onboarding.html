@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaloProfile — One Last Thing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Slide transitions */
+    .slide { display: none; animation: fadeSlideIn 0.45s cubic-bezier(.4,0,.2,1); }
+    .slide.active { display: flex; }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Progress bar */
+    #progress-track { transition: width 0.4s ease; }
+
+    /* Testimonial card carousel */
+    .testimonials-wrap { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 12px; }
+    .testimonials-wrap::-webkit-scrollbar { height: 4px; }
+    .testimonials-wrap::-webkit-scrollbar-thumb { background: #f43f5e; border-radius: 999px; }
+    .testimonial-card { flex: 0 0 280px; scroll-snap-align: start; }
+
+    /* Stat counters */
+    .stat-card { animation: popIn 0.5s cubic-bezier(.4,0,.2,1) both; }
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.25s; }
+    .stat-card:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* Star rating */
+    .stars { color: #f59e0b; }
+
+    /* Gradient bg blobs */
+    .blob { position: absolute; border-radius: 9999px; filter: blur(80px); opacity: 0.25; pointer-events: none; }
+
+    /* Pricing card */
+    .plan-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .plan-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(244,63,94,0.2); }
+
+    /* Gender toggle */
+    .gender-btn { transition: all 0.2s; }
+    .gender-btn.selected { background: linear-gradient(135deg, #f43f5e, #fb923c); color: white; box-shadow: 0 4px 14px rgba(244,63,94,0.4); }
+  </style>
+</head>
+<body class="bg-gray-950 min-h-screen text-white">
+
+  <!-- Fixed top bar -->
+  <div class="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-white/5 px-6 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span>✨</span>
+      <span class="font-bold bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">HaloProfile</span>
+    </div>
+    <!-- Progress bar -->
+    <div class="flex-1 mx-8 bg-white/10 rounded-full h-1.5 max-w-xs">
+      <div id="progress-track" class="h-1.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-400" style="width: 14%"></div>
+    </div>
+    <span id="slide-counter" class="text-xs text-white/40 font-semibold shrink-0">1 / 7</span>
+  </div>
+
+  <!-- Slides container -->
+  <div class="pt-16 min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+
+    <!-- Ambient blobs -->
+    <div class="blob w-[600px] h-[600px] bg-rose-500 -top-40 -right-40 z-0"></div>
+    <div class="blob w-[400px] h-[400px] bg-orange-500 -bottom-40 -left-40 z-0"></div>
+
+    <!-- ──────────────── SLIDE 1: Shocking Stat ──────────────── -->
+    <div class="slide active flex-col items-center text-center max-w-xl w-full relative z-10" id="slide-1">
+      <div class="w-20 h-20 mb-8 rounded-3xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-4xl">💘</div>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-widest mb-6">Did you know?</div>
+      <h2 class="text-5xl font-black leading-tight mb-6">
+        <span class="bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">68%</span> of new<br/>relationships start<br/>on a dating app.
+      </h2>
+      <p class="text-white/60 text-lg leading-relaxed mb-10">Online dating is no longer the exception — it's how most people find love, dates, and connections in 2025.</p>
+      <button onclick="nextSlide()" class="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/30 active:scale-95">
+        That's wild — what's next? →
+      </button>
+    </div>
+
+    <!-- ──────────────── SLIDE 2: Photos = Everything ──────────── -->
+    <div class="slide flex-col items-center text-center max-w-xl w-full relative z-10" id="slide-2">
+      <div class="w-20 h-20 mb-8 rounded-3xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-4xl">👀</div>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-widest mb-6">The hard truth</div>
+      <h2 class="text-4xl font-black leading-tight mb-6">
+        Your profile photo is <span class="bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">the only thing</span> people see before they swipe.
+      </h2>
+      <p class="text-white/60 text-lg leading-relaxed mb-6">A Stanford study found that most users spend <strong class="text-white">less than 3 seconds</strong> deciding whether to swipe right or left — and they decide entirely based on your main photo.</p>
+      <p class="text-white/50 text-base mb-10">Your bio? Your hobbies? Your jokes? Nobody gets that far unless the photo hooks them first.</p>
+      <button onclick="nextSlide()" class="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/30 active:scale-95">
+        Keep going →
+      </button>
+    </div>
+
+    <!-- ──────────────── SLIDE 3: Most photos are garbage ──────── -->
+    <div class="slide flex-col items-center text-center max-w-xl w-full relative z-10" id="slide-3">
+      <div class="w-20 h-20 mb-8 rounded-3xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-4xl">🗑️</div>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold uppercase tracking-widest mb-6">The real problem</div>
+      <h2 class="text-4xl font-black leading-tight mb-8">
+        Most dating profile photos are <span class="bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">absolutely terrible.</span>
+      </h2>
+      <div class="grid grid-cols-1 gap-3 w-full mb-10 text-left">
+        <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <span class="text-2xl shrink-0">🚽</span>
+          <div><p class="font-semibold text-white">Bathroom mirror selfies</p><p class="text-white/40 text-sm">With a messy toilet in the background. No.</p></div>
+        </div>
+        <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <span class="text-2xl shrink-0">😎</span>
+          <div><p class="font-semibold text-white">Sunglasses in every single photo</p><p class="text-white/40 text-sm">Are you hiding from an ex or a warrant?</p></div>
+        </div>
+        <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <span class="text-2xl shrink-0">👥</span>
+          <div><p class="font-semibold text-white">Group photos where nobody knows who you are</p><p class="text-white/40 text-sm">And you're the worst-looking one.</p></div>
+        </div>
+        <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <span class="text-2xl shrink-0">🌚</span>
+          <div><p class="font-semibold text-white">Dark, blurry, badly lit shots</p><p class="text-white/40 text-sm">Taken on a potato from 2014.</p></div>
+        </div>
+      </div>
+      <button onclick="nextSlide()" class="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/30 active:scale-95">
+        So what's the fix? →
+      </button>
+    </div>
+
+    <!-- ──────────────── SLIDE 4: Great photos = More matches ──── -->
+    <div class="slide flex-col items-center text-center max-w-xl w-full relative z-10" id="slide-4">
+      <div class="w-20 h-20 mb-8 rounded-3xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-4xl">📈</div>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">The data is clear</div>
+      <h2 class="text-4xl font-black leading-tight mb-8">
+        Better photos = <span class="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">dramatically more</span> matches.
+      </h2>
+      <div class="grid grid-cols-3 gap-4 w-full mb-10">
+        <div class="stat-card bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center">
+          <span class="text-3xl font-black bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">3×</span>
+          <span class="text-white/50 text-xs mt-2 leading-tight">more right swipes on average</span>
+        </div>
+        <div class="stat-card bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center">
+          <span class="text-3xl font-black bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">70%</span>
+          <span class="text-white/50 text-xs mt-2 leading-tight">more conversations started</span>
+        </div>
+        <div class="stat-card bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col items-center">
+          <span class="text-3xl font-black bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">5×</span>
+          <span class="text-white/50 text-xs mt-2 leading-tight">more dates booked per month</span>
+        </div>
+      </div>
+      <p class="text-white/50 text-base mb-10">The single highest-ROI thing you can do for your dating life isn't hitting the gym or crafting the perfect bio — it's upgrading your profile photo.</p>
+      <button onclick="nextSlide()" class="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/30 active:scale-95">
+        How do I get those photos? →
+      </button>
+    </div>
+
+    <!-- ──────────────── SLIDE 5: HaloProfile solution ──────────────── -->
+    <div class="slide flex-col items-center text-center max-w-xl w-full relative z-10" id="slide-5">
+      <div class="w-20 h-20 mb-8 rounded-3xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-4xl">✨</div>
+      <h2 class="text-4xl font-black leading-tight mb-4">
+        Enter <span class="bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">HaloProfile.</span>
+      </h2>
+      <p class="text-white/60 text-lg leading-relaxed mb-8">We trained a custom AI model on your face. It knows every angle, every feature, every bit of what makes you look good. Now we generate as many stunning, professional-looking photos as you want — on demand.</p>
+
+      <!-- Testimonials carousel -->
+      <div class="w-full mb-8">
+        <div class="testimonials-wrap px-0">
+          <div class="testimonial-card bg-white/5 border border-white/10 rounded-2xl p-5 text-left">
+            <div class="stars text-lg mb-2">★★★★★</div>
+            <p class="text-white/80 text-sm leading-relaxed mb-4">"I got 47 matches in my first week after switching my Hinge photos to HaloProfile ones. Before I was getting maybe 3 a week. This thing is insane."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-400 to-orange-400 flex items-center justify-center text-xs font-black">M</div>
+              <div><p class="text-white font-semibold text-sm">Marcus, 28</p><p class="text-white/40 text-xs">New York, NY</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card bg-white/5 border border-white/10 rounded-2xl p-5 text-left">
+            <div class="stars text-lg mb-2">★★★★★</div>
+            <p class="text-white/80 text-sm leading-relaxed mb-4">"Honestly felt like a scam at first, but I'm literally going on 2–3 dates a week now. My friends keep asking me what changed. I just say 'better lighting lol.'"</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-xs font-black">J</div>
+              <div><p class="text-white font-semibold text-sm">Jake, 31</p><p class="text-white/40 text-xs">Austin, TX</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card bg-white/5 border border-white/10 rounded-2xl p-5 text-left">
+            <div class="stars text-lg mb-2">★★★★★</div>
+            <p class="text-white/80 text-sm leading-relaxed mb-4">"I was skeptical because AI photos can look fake. These look 100% real — my actual face, just on a good day. Got my first date in 6 months within 48 hours."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-xs font-black">R</div>
+              <div><p class="text-white font-semibold text-sm">Ryan, 26</p><p class="text-white/40 text-xs">Chicago, IL</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card bg-white/5 border border-white/10 rounded-2xl p-5 text-left">
+            <div class="stars text-lg mb-2">★★★★★</div>
+            <p class="text-white/80 text-sm leading-relaxed mb-4">"The photos make me look like I have my life together. Matched with someone way out of my league and we've been dating for 3 months. Best $30 I've ever spent."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-rose-400 flex items-center justify-center text-xs font-black">D</div>
+              <div><p class="text-white font-semibold text-sm">Derek, 34</p><p class="text-white/40 text-xs">Los Angeles, CA</p></div>
+            </div>
+          </div>
+          <div class="testimonial-card bg-white/5 border border-white/10 rounded-2xl p-5 text-left">
+            <div class="stars text-lg mb-2">★★★★★</div>
+            <p class="text-white/80 text-sm leading-relaxed mb-4">"Bro I literally tripled my match rate. I started using these photos on Bumble and Tinder and my phone hasn't stopped buzzing. This is a cheat code."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-pink-400 flex items-center justify-center text-xs font-black">A</div>
+              <div><p class="text-white font-semibold text-sm">Alex, 29</p><p class="text-white/40 text-xs">Miami, FL</p></div>
+            </div>
+          </div>
+        </div>
+        <p class="text-white/30 text-xs mt-3">← Scroll to see more reviews</p>
+      </div>
+
+      <button onclick="nextSlide()" class="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/30 active:scale-95">
+        I'm in — show me the plan →
+      </button>
+    </div>
+
+    <!-- ──────────────── SLIDE 6: Gender selection ──────────────── -->
+    <div class="slide flex-col items-center text-center max-w-xl w-full relative z-10" id="slide-6">
+      <div class="w-20 h-20 mb-8 rounded-3xl bg-violet-500/20 border border-violet-500/30 flex items-center justify-center text-4xl">👤</div>
+      <h2 class="text-4xl font-black leading-tight mb-4">One quick question</h2>
+      <p class="text-white/60 text-lg mb-10">What style should we aim for in your photos? This helps us pick the right poses, lighting, and settings.</p>
+      <div class="flex gap-4 w-full max-w-sm mb-10">
+        <button id="gender-male" onclick="selectGender('male')" class="gender-btn selected flex-1 py-5 rounded-2xl border border-white/10 bg-white/5 font-bold text-lg flex flex-col items-center gap-2">
+          <span class="text-3xl">🧔</span>
+          <span>Masculine</span>
+        </button>
+        <button id="gender-female" onclick="selectGender('female')" class="gender-btn flex-1 py-5 rounded-2xl border border-white/10 bg-white/5 font-bold text-lg flex flex-col items-center gap-2">
+          <span class="text-3xl">💁‍♀️</span>
+          <span>Feminine</span>
+        </button>
+      </div>
+      <button onclick="nextSlide()" class="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/30 active:scale-95">
+        Continue →
+      </button>
+    </div>
+
+    <!-- ──────────────── SLIDE 7: Pricing ──────────────────────── -->
+    <div class="slide flex-col items-center text-center max-w-lg w-full relative z-10" id="slide-7">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase tracking-widest mb-6">🔥 Your photos are ready to generate</div>
+      <h2 class="text-4xl font-black leading-tight mb-3">Start getting <span class="bg-gradient-to-r from-rose-400 to-orange-400 bg-clip-text text-transparent">more matches</span> today.</h2>
+      <p class="text-white/50 text-base mb-8">Your AI model is trained and ready. Subscribe to unlock your photos now.</p>
+
+      <!-- Plan card -->
+      <div class="plan-card w-full bg-gradient-to-br from-white/10 to-white/5 border border-rose-500/30 rounded-3xl p-8 mb-6 relative overflow-hidden">
+        <div class="absolute top-4 right-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-black uppercase px-3 py-1 rounded-full">Most Popular</div>
+        <div class="text-5xl font-black text-white mb-1">$29.99<span class="text-xl text-white/40 font-normal">/mo</span></div>
+        <div class="text-rose-400 font-semibold mb-6">Premium Plan</div>
+        <ul class="text-left space-y-3 mb-8">
+          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> <strong class="text-white">500 credits per month</strong> (20 photos)</li>
+          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> Your personal AI trained on your face</li>
+          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> All photography styles included</li>
+          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> Custom prompt support — generate what YOU want</li>
+          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> HD downloads, cancel anytime</li>
+        </ul>
+        <button id="checkout-btn" onclick="goToCheckout()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/40 active:scale-95">
+          ✨ Unlock My Photos — $29.99/mo
+        </button>
+      </div>
+
+      <p id="checkout-error" class="hidden text-red-400 text-sm mb-4"></p>
+      <p class="text-white/30 text-xs">No hidden fees · Cancel anytime · Secure checkout via Stripe</p>
+    </div>
+
+  </div><!-- end slides container -->
+
+  <script type="module">
+    import { requireLogin, getToken } from "/js/auth.js";
+    
+    await requireLogin();
+
+    let currentSlide = 1;
+    const TOTAL_SLIDES = 7;
+    let selectedGender = "male";
+
+    const progressEl   = document.getElementById("progress-track");
+    const counterEl    = document.getElementById("slide-counter");
+
+    function showSlide(n) {
+      document.querySelectorAll(".slide").forEach(s => s.classList.remove("active"));
+      const target = document.getElementById(`slide-${n}`);
+      if (target) target.classList.add("active");
+      const pct = Math.round((n / TOTAL_SLIDES) * 100);
+      progressEl.style.width = pct + "%";
+      counterEl.textContent = `${n} / ${TOTAL_SLIDES}`;
+    }
+
+    window.nextSlide = () => {
+      if (currentSlide < TOTAL_SLIDES) {
+        currentSlide++;
+        showSlide(currentSlide);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+
+    window.selectGender = (gender) => {
+      selectedGender = gender;
+      document.getElementById("gender-male").classList.toggle("selected",   gender === "male");
+      document.getElementById("gender-female").classList.toggle("selected", gender === "female");
+    };
+
+    window.goToCheckout = async () => {
+      const btn     = document.getElementById("checkout-btn");
+      const errorEl = document.getElementById("checkout-error");
+      btn.disabled  = true;
+      btn.textContent = "Redirecting to checkout…";
+      errorEl.classList.add("hidden");
+
+      try {
+        const token    = await getToken();
+        const uploadId = localStorage.getItem("haloprofile_uploadId") || "";
+
+        const res = await fetch("/api/stripe/create-checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ plan: "premium", uploadId, gender: selectedGender }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Checkout failed");
+        window.location.href = data.checkoutUrl;
+
+      } catch (err) {
+        btn.disabled    = false;
+        btn.textContent = "✨ Unlock My Photos — $29.99/mo";
+        errorEl.textContent = err.message;
+        errorEl.classList.remove("hidden");
+      }
+    };
+  </script>
+</body>
+</html>

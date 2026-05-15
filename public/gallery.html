@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaloProfile — Your Photo Gallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- JSZip via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- FileSaver.js via CDN for easier zip downloading -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Masonry Grid */
+    .masonry {
+      column-count: 1;
+      column-gap: 1.5rem;
+    }
+    @media (min-width: 640px) {
+      .masonry { column-count: 2; }
+    }
+    @media (min-width: 1024px) {
+      .masonry { column-count: 3; }
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Skeleton Loading Animation */
+    @keyframes pulse-bg {
+      0% { background-color: #f3f4f6; }
+      50% { background-color: #e5e7eb; }
+      100% { background-color: #f3f4f6; }
+    }
+    .skeleton {
+      animation: pulse-bg 1.5s infinite;
+    }
+
+    /* Download Overlay */
+    .photo-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .masonry-item:hover .photo-overlay {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <nav class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+    <a href="/" class="flex items-center gap-2">
+      <span class="text-xl">✨</span>
+      <span class="font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <button id="credits-display" onclick="openBuyCreditsModal()" class="hidden flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 font-bold text-sm rounded-lg border border-rose-200 transition-colors shadow-sm">
+        🪙 <span id="credits-balance">0</span> Credits
+      </button>
+      <button id="btn-settings" class="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-300 font-medium text-sm rounded-lg transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        Settings
+      </button>
+      <button id="btn-generate-new" class="hidden items-center gap-2 px-5 py-2 bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-medium rounded-lg transition-all shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        Generate New
+      </button>
+      <button id="btn-download-all" class="hidden items-center gap-2 px-5 py-2 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        Download All ZIP
+      </button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 py-10">
+    
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div>
+        <h1 class="text-4xl font-black text-gray-900 mb-2">Your Gallery</h1>
+        <p class="text-gray-500 text-lg">
+          <span id="photo-count" class="font-bold text-gray-700">0</span> magical photos generated from your face.
+        </p>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex flex-wrap gap-2" id="filter-tabs">
+        <button data-style="all" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-gray-900 text-white shadow-sm border border-transparent">
+          All Styles
+        </button>
+        <button data-style="outdoor" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 hover:bg-gray-50 border border-gray-200">
+          Outdoor
+        </button>
+        <button data-style="professional" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 hover:bg-gray-50 border border-gray-200">
+          Professional
+        </button>
+        <button data-style="lifestyle" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 hover:bg-gray-50 border border-gray-200">
+          Lifestyle
+        </button>
+        <button data-style="travel" class="filter-btn px-4 py-2 rounded-full text-sm font-semibold transition-colors bg-white text-gray-600 hover:bg-gray-50 border border-gray-200">
+          Travel
+        </button>
+      </div>
+      
+      <!-- Main Generate Button -->
+      <button id="btn-generate-main" onclick="document.getElementById('generate-modal').classList.remove('hidden')" class="hidden items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all shadow-md shadow-rose-200 shrink-0">
+        ✨ Generate Photos
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden bg-white rounded-3xl p-12 text-center border border-gray-100 shadow-sm mt-8">
+      <div class="text-5xl mb-4">📸</div>
+      <h3 id="empty-state-title" class="text-xl font-bold text-gray-900 mb-2">No photos here yet</h3>
+      <p id="empty-state-desc" class="text-gray-500">Upload your photos and get AI-generated portraits. Your gallery will appear here once photos are ready.</p>
+      
+      <div id="empty-state-action-upload" class="mt-6">
+        <a href="/upload.html" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all shadow-md">
+          Upload Photos →
+        </a>
+      </div>
+
+      <div id="empty-state-action-generate" class="hidden mt-6">
+        <button onclick="document.getElementById('generate-modal').classList.remove('hidden')" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-semibold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all shadow-md">
+          ✨ Generate First Photo
+        </button>
+      </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div id="gallery-grid" class="masonry">
+      <!-- Skeletons load initially -->
+      <div class="masonry-item skeleton h-96 rounded-2xl"></div>
+      <div class="masonry-item skeleton h-72 rounded-2xl"></div>
+      <div class="masonry-item skeleton h-80 rounded-2xl"></div>
+      <div class="masonry-item skeleton h-96 rounded-2xl"></div>
+      <div class="masonry-item skeleton h-64 rounded-2xl"></div>
+      <div class="masonry-item skeleton h-80 rounded-2xl"></div>
+    </div>
+
+    <!-- Generate New Modal -->
+    <div id="generate-modal" class="hidden fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+        <!-- Modal header -->
+        <div class="bg-gradient-to-r from-rose-500 to-orange-500 px-8 py-6 text-center">
+          <h2 class="text-2xl font-black text-white">✨ Generate New Photos</h2>
+          <p class="text-rose-100 text-sm mt-1">Create more photos with your trained model</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+
+          <!-- Style Selector -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Select Style</label>
+            <div class="grid grid-cols-2 gap-2" id="generate-style-options">
+              <button data-style="outdoor" class="generate-style-btn px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 bg-rose-50 border-rose-500 text-rose-700 shadow-sm">
+                🌳 Outdoor
+              </button>
+              <button data-style="professional" class="generate-style-btn px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">
+                💼 Professional
+              </button>
+              <button data-style="lifestyle" class="generate-style-btn px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">
+                ☕ Lifestyle
+              </button>
+              <button data-style="travel" class="generate-style-btn px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">
+                ✈️ Travel
+              </button>
+            </div>
+          </div>
+
+          <!-- Count Selector -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Number of Photos <span class="text-gray-400 font-normal">(max 10)</span></label>
+            <div class="flex gap-2 flex-wrap" id="generate-count-options">
+              <button data-count="1" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 bg-rose-50 border-rose-500 text-rose-700 shadow-sm">1</button>
+              <button data-count="2" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">2</button>
+              <button data-count="3" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">3</button>
+              <button data-count="4" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">4</button>
+              <button data-count="5" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">5</button>
+              <button data-count="6" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">6</button>
+              <button data-count="7" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">7</button>
+              <button data-count="8" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">8</button>
+              <button data-count="9" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">9</button>
+              <button data-count="10" class="generate-count-btn flex-1 min-w-[3rem] px-4 py-3 rounded-xl text-sm font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50">10</button>
+            </div>
+          </div>
+
+          <!-- Shot Framing -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Shot Framing</label>
+            <div class="grid grid-cols-4 gap-2" id="generate-shot-options">
+              <button data-shot="face"     class="generate-shot-btn px-2 py-3 rounded-xl text-xs font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                🤳<br>Face
+              </button>
+              <button data-shot="bust"     class="generate-shot-btn px-2 py-3 rounded-xl text-xs font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                👤<br>Bust
+              </button>
+              <button data-shot="torso"    class="generate-shot-btn px-2 py-3 rounded-xl text-xs font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                🧍<br>Torso
+              </button>
+              <button data-shot="fullbody" class="generate-shot-btn px-2 py-3 rounded-xl text-xs font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                🚶<br>Full Body
+              </button>
+            </div>
+          </div>
+
+          <!-- Custom Prompt -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-1">Describe your photo <span class="text-gray-400 font-normal">(optional)</span></label>
+            <input type="text" id="custom-prompt" placeholder="e.g., wearing a red jacket, on mars" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-rose-500 focus:ring-0 transition-colors text-sm">
+          </div>
+
+          <!-- Error -->
+          <div id="generate-error" class="hidden px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg text-center"></div>
+
+          <!-- Cost & Generate Button -->
+          <div class="space-y-3 pt-2 border-t border-gray-100">
+            <div class="flex justify-between items-center px-1">
+              <span class="text-sm font-bold text-gray-700">Cost:</span>
+              <span id="generate-cost-display" class="text-sm font-bold text-gray-900">25 Credits</span>
+            </div>
+            
+            <button id="btn-run-generate" onclick="runGenerate()"
+              class="w-full py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-base rounded-2xl
+                     shadow-xl shadow-rose-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+              ✨ Generate Photos
+            </button>
+            
+            <!-- Buy Credits shortcut -->
+            <div class="text-center">
+              <button type="button" onclick="openBuyCreditsModal()" class="text-xs text-gray-500 hover:text-rose-600 font-medium transition-colors">
+                Need more? Buy Credits
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-8 py-6 text-center">
+          <h2 class="text-xl font-black text-white">⚙️ Settings</h2>
+          <p class="text-gray-400 text-sm mt-1">Adjust how your AI photos are generated</p>
+        </div>
+        <div class="p-6 space-y-5">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Generate photos as</label>
+            <div class="flex gap-3">
+              <button id="settings-gender-male"
+                onclick="setSettingsGender('male')"
+                class="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all bg-gray-900 border-gray-900 text-white shadow">
+                👨 Male
+              </button>
+              <button id="settings-gender-female"
+                onclick="setSettingsGender('female')"
+                class="flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50">
+                👩 Female
+              </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">This applies to all future generated photos. Re-training is not required.</p>
+          </div>
+
+          <!-- Shot type default -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">Default Shot Framing</label>
+            <div class="grid grid-cols-4 gap-2" id="settings-shot-options">
+              <button data-shot="face"     onclick="setSettingsShotType('face')"
+                class="settings-shot-btn px-2 py-3 rounded-xl text-xs font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                🤳<br>Face
+              </button>
+              <button data-shot="bust"     onclick="setSettingsShotType('bust')"
+                class="settings-shot-btn px-2 py-3 rounded-xl text-xs font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                👤<br>Bust
+              </button>
+              <button data-shot="torso"    onclick="setSettingsShotType('torso')"
+                class="settings-shot-btn px-2 py-3 rounded-xl text-xs font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                🧍<br>Torso
+              </button>
+              <button data-shot="fullbody" onclick="setSettingsShotType('fullbody')"
+                class="settings-shot-btn px-2 py-3 rounded-xl text-xs font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50 text-center">
+                🚶<br>Full Body
+              </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">Torso and Full Body use a taller canvas for best results.</p>
+          </div>
+
+          <div id="settings-status" class="hidden text-sm text-center font-medium py-2 rounded-lg"></div>
+
+          <div class="flex gap-3">
+            <button onclick="closeSettings()"
+              class="flex-1 py-3 border-2 border-gray-200 text-gray-600 font-semibold rounded-xl hover:border-gray-300 transition-all text-sm">
+              Cancel
+            </button>
+            <button id="btn-save-settings" onclick="saveSettings()"
+              class="flex-1 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl shadow-md transition-all text-sm hover:from-rose-600 hover:to-orange-600 active:scale-95">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buy Credits Modal -->
+    <div id="buy-credits-modal" class="hidden fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6 text-center">
+          <h2 class="text-2xl font-black text-white">🪙 Buy Credits</h2>
+          <p class="text-emerald-100 text-sm mt-1">Top up your balance instantly</p>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="grid grid-cols-1 gap-3">
+            <button onclick="buyCredits(10)" class="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
+              <div>
+                <div class="font-bold text-gray-900 group-hover:text-emerald-700">150 Credits</div>
+                <div class="text-xs text-gray-500">Perfect for a few quick shots</div>
+              </div>
+              <div class="font-black text-lg text-emerald-600">$10</div>
+            </button>
+            <button onclick="buyCredits(20)" class="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
+              <div>
+                <div class="font-bold text-gray-900 group-hover:text-emerald-700">350 Credits</div>
+                <div class="text-xs text-gray-500">Includes 50 bonus credits</div>
+              </div>
+              <div class="font-black text-lg text-emerald-600">$20</div>
+            </button>
+            <button onclick="buyCredits(50)" class="flex items-center justify-between p-4 rounded-xl border-2 border-emerald-500 bg-emerald-50 transition-all text-left relative group">
+              <span class="absolute -top-3 left-4 bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wide">Most Popular</span>
+              <div>
+                <div class="font-bold text-gray-900 group-hover:text-emerald-700">1000 Credits</div>
+                <div class="text-xs text-gray-500">Best value for regular users</div>
+              </div>
+              <div class="font-black text-lg text-emerald-600">$50</div>
+            </button>
+            <button onclick="buyCredits(100)" class="flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all text-left group">
+              <div>
+                <div class="font-bold text-gray-900 group-hover:text-emerald-700">2500 Credits</div>
+                <div class="text-xs text-gray-500">Ultimate power user pack</div>
+              </div>
+              <div class="font-black text-lg text-emerald-600">$100</div>
+            </button>
+          </div>
+          <div id="buy-credits-error" class="hidden px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg text-center"></div>
+          <button onclick="closeBuyCreditsModal()" class="w-full py-3 mt-2 text-gray-500 font-semibold hover:text-gray-800 transition-colors border-2 border-transparent hover:border-gray-200 rounded-xl">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module">
+    import { requireLogin, authFetch, getProfile, updateProfile } from "/js/auth.js";
+
+    let jobId = null;
+    let allPhotos = [];
+    let currentStyle = "all";
+
+    let generateStyle = "outdoor";
+    let generateCount = 1;
+    let isGenerating = false;
+    let userGender    = "male";  // loaded from profile
+    let userShotType  = "bust";  // loaded from profile
+    let userCredits   = 0;
+
+    const galleryGrid = document.getElementById("gallery-grid");
+    const photoCountEl = document.getElementById("photo-count");
+    const emptyState = document.getElementById("empty-state");
+    const btnDownloadAll = document.getElementById("btn-download-all");
+    const btnGenerateNew = document.getElementById("btn-generate-new");
+    const generateModal = document.getElementById("generate-modal");
+    const filterTabs = document.querySelectorAll(".filter-btn");
+
+    async function init() {
+      await requireLogin();
+
+      // Load gender + shot type preferences from profile
+      const profile = await getProfile();
+      userGender   = profile?.gender    || "male";
+      userShotType = profile?.shot_type || "bust";
+      applySettingsGenderUI(userGender);
+      applySettingsShotUI(userShotType);
+      applyGenerateShotUI(userShotType); // prime Generate New modal too
+
+      const urlParams = new URLSearchParams(window.location.search);
+      jobId = urlParams.get('jobId');
+
+      setupListeners();
+      await fetchCredits();
+      await fetchPhotos();
+    }
+
+    async function fetchCredits() {
+      try {
+        const res = await authFetch("/api/photos/credits");
+        if (res.ok) {
+          const data = await res.json();
+          userCredits = data.total;
+          document.getElementById('credits-balance').textContent = userCredits;
+          document.getElementById('credits-display').classList.remove('hidden');
+          updateGenerateCostUI();
+        }
+      } catch (err) {
+        console.error("Error fetching credits", err);
+      }
+    }
+
+    function updateGenerateCostUI() {
+      const cost = generateCount * 25;
+      const costEl = document.getElementById("generate-cost-display");
+      const btn = document.getElementById("btn-run-generate");
+      
+      if (!costEl) return;
+      
+      costEl.textContent = `${cost} Credits`;
+      
+      if (cost > userCredits) {
+        costEl.classList.add("text-red-500");
+        costEl.classList.remove("text-gray-900");
+        btn.disabled = true;
+        btn.innerHTML = "Not enough credits";
+      } else {
+        costEl.classList.remove("text-red-500");
+        costEl.classList.add("text-gray-900");
+        btn.disabled = false;
+        btn.innerHTML = "✨ Generate Photos";
+      }
+    }
+
+    function setupListeners() {
+      // Settings button
+      document.getElementById('btn-settings').addEventListener('click', () => {
+        applySettingsGenderUI(userGender);   // sync UI to current values
+        applySettingsShotUI(userShotType);
+        document.getElementById('settings-modal').classList.remove('hidden');
+      });
+
+      // Close settings on backdrop
+      document.getElementById('settings-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('settings-modal')) closeSettings();
+      });
+
+      // Filter Tabs
+      filterTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Update active styling
+          filterTabs.forEach(b => {
+            b.classList.remove('bg-gray-900', 'text-white', 'border-transparent', 'shadow-sm');
+            b.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+          });
+          btn.classList.add('bg-gray-900', 'text-white', 'border-transparent', 'shadow-sm');
+          btn.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+
+          currentStyle = btn.dataset.style;
+          renderGallery();
+        });
+      });
+
+      // Generate New
+      btnGenerateNew.addEventListener('click', () => {
+        generateModal.classList.remove("hidden");
+      });
+
+      // Close modal on backdrop click
+      generateModal.addEventListener('click', (e) => {
+        if (e.target === generateModal) {
+          generateModal.classList.add("hidden");
+        }
+      });
+
+      // Style selection
+      document.querySelectorAll(".generate-style-btn").forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll(".generate-style-btn").forEach(b => {
+            b.classList.remove('bg-rose-50', 'border-rose-500', 'text-rose-700', 'shadow-sm');
+            b.classList.add('border-gray-200', 'text-gray-600');
+          });
+          btn.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-700', 'shadow-sm');
+          btn.classList.remove('border-gray-200', 'text-gray-600');
+          generateStyle = btn.dataset.style;
+        });
+      });
+
+      // Count selection
+      document.querySelectorAll(".generate-count-btn").forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll(".generate-count-btn").forEach(b => {
+            b.classList.remove('bg-rose-50', 'border-rose-500', 'text-rose-700', 'shadow-sm');
+            b.classList.add('border-gray-200', 'text-gray-600');
+          });
+          btn.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-700', 'shadow-sm');
+          btn.classList.remove('border-gray-200', 'text-gray-600');
+          generateCount = parseInt(btn.dataset.count);
+          updateGenerateCostUI();
+        });
+      });
+
+      // Shot framing selection (Generate New modal)
+      document.querySelectorAll(".generate-shot-btn").forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyGenerateShotUI(btn.dataset.shot);
+          userShotType = btn.dataset.shot; // override for this session
+        });
+      });
+
+      // Download All
+      btnDownloadAll.addEventListener('click', downloadAllZip);
+    }
+
+    async function fetchPhotos() {
+      try {
+        // If jobId is provided, fetch photos for that specific job.
+        // Otherwise, fetch ALL photos across all jobs for this user.
+        const endpoint = jobId ? `/api/photos/${jobId}` : `/api/photos`;
+        const res = await authFetch(endpoint);
+        if (!res.ok) {
+          throw new Error("Failed to fetch photos");
+        }
+
+        const data = await res.json();
+        allPhotos = data.photos || [];
+        
+        if (data.hasModel) {
+          btnGenerateNew.classList.remove("hidden");
+          btnGenerateNew.classList.add("inline-flex");
+          const btnGenMain = document.getElementById("btn-generate-main");
+          if (btnGenMain) {
+            btnGenMain.classList.remove("hidden");
+            btnGenMain.classList.add("inline-flex");
+          }
+        }
+
+        if (allPhotos.length > 0) {
+          btnDownloadAll.classList.remove("hidden");
+          btnDownloadAll.classList.add("inline-flex");
+          emptyState.classList.add("hidden");
+          photoCountEl.textContent = allPhotos.length;
+        } else {
+          emptyState.classList.remove("hidden");
+          if (data.hasModel) {
+            document.getElementById('empty-state-title').textContent = "Model trained! 🎉";
+            document.getElementById('empty-state-desc').textContent = "Your AI model is ready. Click below to generate your first photos.";
+            document.getElementById('empty-state-action-upload').classList.add("hidden");
+            document.getElementById('empty-state-action-generate').classList.remove("hidden");
+          }
+        }
+
+        renderGallery();
+
+      } catch (err) {
+        console.error(err);
+        galleryGrid.innerHTML = `<p class="text-red-500 font-medium">Error loading photos. Please try refreshing.</p>`;
+      }
+    }
+
+    function renderGallery() {
+      if (allPhotos.length === 0) {
+        galleryGrid.innerHTML = "";
+        return;
+      }
+
+      const filteredPhotos = currentStyle === "all" 
+        ? allPhotos 
+        : allPhotos.filter(p => p.style === currentStyle);
+
+      galleryGrid.innerHTML = "";
+
+      filteredPhotos.forEach(photo => {
+        // Style Badge Map
+        const styleColors = {
+          outdoor: "bg-green-100 text-green-700 border-green-200",
+          professional: "bg-blue-100 text-blue-700 border-blue-200",
+          lifestyle: "bg-orange-100 text-orange-700 border-orange-200",
+          travel: "bg-purple-100 text-purple-700 border-purple-200"
+        };
+        const colorClass = styleColors[photo.style] || "bg-gray-100 text-gray-700";
+
+        const itemHTML = `
+          <div class="masonry-item relative group rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-100">
+            <!-- Image (lazy loaded natively) -->
+            <img 
+              src="${photo.signedUrl}" 
+              alt="${photo.style} portrait"
+              loading="lazy"
+              class="w-full h-auto object-cover block transition-transform duration-500 group-hover:scale-[1.02]"
+              onload="this.parentElement.classList.remove('skeleton')"
+            />
+            
+            <!-- Badge -->
+            <div class="absolute top-4 left-4">
+              <span class="px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide border shadow-sm backdrop-blur-md ${colorClass}">
+                ${photo.style}
+              </span>
+            </div>
+
+            <!-- Overlay & Download Button -->
+            <div class="photo-overlay absolute inset-0 flex items-end justify-center pb-6">
+              <button 
+                onclick="downloadSingle('${photo.signedUrl}', '${photo.id}.jpg')"
+                class="flex items-center gap-2 px-5 py-2.5 bg-white/90 hover:bg-white text-gray-900 font-bold rounded-xl shadow-lg transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Download
+              </button>
+            </div>
+          </div>
+        `;
+        galleryGrid.insertAdjacentHTML('beforeend', itemHTML);
+      });
+    }
+
+    window.runGenerate = async function() {
+      if (isGenerating) return;
+
+      const btn = document.getElementById("btn-run-generate");
+      const errorEl = document.getElementById("generate-error");
+      errorEl.classList.add("hidden");
+      
+      isGenerating = true;
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
+
+      const customPrompt = document.getElementById("custom-prompt").value.trim();
+
+      try {
+        const res = await authFetch("/api/photos/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            style: generateStyle,
+            count: generateCount,
+            gender: userGender,
+            shotType: userShotType,
+            customPrompt: customPrompt
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || "Generation failed");
+        }
+
+        const data = await res.json();
+        const newPhotos = data.photos || [];
+
+        // Add new photos to the top of allPhotos
+        const now = new Date().toISOString();
+        const mapped = newPhotos.map(p => ({
+          id: p.id,
+          signedUrl: p.signedUrl,
+          style: p.style,
+          created_at: now,
+        }));
+
+        allPhotos = [...mapped, ...allPhotos];
+        photoCountEl.textContent = allPhotos.length;
+        
+        if (data.credits !== undefined) {
+          userCredits = data.credits;
+          document.getElementById('credits-balance').textContent = userCredits;
+          updateGenerateCostUI();
+        }
+
+        // Close modal and re-render
+        generateModal.classList.add("hidden");
+        document.getElementById("custom-prompt").value = "";
+        renderGallery();
+
+      } catch (err) {
+        console.error("Generate failed:", err);
+        errorEl.textContent = err.message || "Failed to generate photos. Please try again.";
+        errorEl.classList.remove("hidden");
+      } finally {
+        isGenerating = false;
+        btn.disabled = false;
+        btn.innerHTML = "✨ Generate Photos";
+      }
+    };
+
+    window.downloadSingle = async function(url, filename) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        saveAs(blob, `haloprofile-${filename}`);
+      } catch (err) {
+        console.error("Download failed", err);
+        alert("Failed to download photo.");
+      }
+    };
+
+    async function downloadAllZip() {
+      if (allPhotos.length === 0) return;
+
+      const originalText = btnDownloadAll.innerHTML;
+      btnDownloadAll.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        Zipping ${allPhotos.length}...
+      `;
+      btnDownloadAll.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        const folder = zip.folder("haloprofile-photos");
+
+        // Fetch all images in parallel and add to zip
+        const fetchPromises = allPhotos.map(async (photo, index) => {
+          const response = await fetch(photo.signedUrl);
+          const blob = await response.blob();
+          folder.file(`${photo.style}-${index + 1}.jpg`, blob);
+        });
+
+        await Promise.all(fetchPromises);
+
+        btnDownloadAll.innerHTML = "Generating ZIP...";
+        
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        saveAs(zipBlob, "haloprofile-photos.zip");
+
+      } catch (err) {
+        console.error("Zip failed", err);
+        alert("Failed to create ZIP file.");
+      } finally {
+        btnDownloadAll.innerHTML = originalText;
+        btnDownloadAll.disabled = false;
+      }
+    }
+
+    // ─── Settings modal functions ──────────────────────────────
+    let pendingGender   = "male";  // staged inside modal before saving
+    let pendingShotType = "bust";  // staged inside modal before saving
+
+    const SHOT_ACTIVE   = "settings-shot-btn px-2 py-3 rounded-xl text-xs font-bold border-2 transition-all bg-gray-900 border-gray-900 text-white shadow text-center";
+    const SHOT_INACTIVE = "settings-shot-btn px-2 py-3 rounded-xl text-xs font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50 text-center";
+    const SHOT_ACTIVE_ROSE   = "generate-shot-btn px-2 py-3 rounded-xl text-xs font-bold transition-all border-2 bg-rose-50 border-rose-500 text-rose-700 shadow-sm text-center";
+    const SHOT_INACTIVE_ROSE = "generate-shot-btn px-2 py-3 rounded-xl text-xs font-bold transition-all border-2 border-gray-200 text-gray-600 hover:bg-gray-50 text-center";
+
+    function applySettingsGenderUI(gender) {
+      pendingGender = gender;
+      const maleBtn   = document.getElementById("settings-gender-male");
+      const femaleBtn = document.getElementById("settings-gender-female");
+      if (gender === "female") {
+        femaleBtn.className = "flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all bg-gray-900 border-gray-900 text-white shadow";
+        maleBtn.className   = "flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50";
+      } else {
+        maleBtn.className   = "flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all bg-gray-900 border-gray-900 text-white shadow";
+        femaleBtn.className = "flex-1 py-3 rounded-xl text-sm font-bold border-2 transition-all border-gray-200 text-gray-600 hover:bg-gray-50";
+      }
+    }
+
+    function applySettingsShotUI(shotType) {
+      pendingShotType = shotType;
+      document.querySelectorAll(".settings-shot-btn").forEach(btn => {
+        btn.className = btn.dataset.shot === shotType ? SHOT_ACTIVE : SHOT_INACTIVE;
+      });
+    }
+
+    function applyGenerateShotUI(shotType) {
+      document.querySelectorAll(".generate-shot-btn").forEach(btn => {
+        btn.className = btn.dataset.shot === shotType ? SHOT_ACTIVE_ROSE : SHOT_INACTIVE_ROSE;
+      });
+    }
+
+    window.setSettingsGender   = (g) => applySettingsGenderUI(g);
+    window.setSettingsShotType = (s) => applySettingsShotUI(s);
+
+    window.saveSettings = async () => {
+      const btn      = document.getElementById("btn-save-settings");
+      const statusEl = document.getElementById("settings-status");
+
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      statusEl.classList.add("hidden");
+
+      try {
+        await updateProfile({ gender: pendingGender, shot_type: pendingShotType });
+        userGender   = pendingGender;    // commit
+        userShotType = pendingShotType;  // commit
+        applyGenerateShotUI(userShotType); // keep Generate New modal in sync
+        statusEl.textContent = "✅ Saved!";
+        statusEl.className = "text-sm text-center font-medium py-2 rounded-lg bg-green-50 text-green-700";
+        statusEl.classList.remove("hidden");
+        setTimeout(() => closeSettings(), 900);
+      } catch (err) {
+        statusEl.textContent = "❌ Failed to save. Please try again.";
+        statusEl.className = "text-sm text-center font-medium py-2 rounded-lg bg-red-50 text-red-600";
+        statusEl.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Save Changes";
+      }
+    };
+
+    window.closeSettings = () => {
+      document.getElementById("settings-modal").classList.add("hidden");
+      document.getElementById("settings-status").classList.add("hidden");
+    };
+
+    // Buy credits logic
+    window.openBuyCreditsModal = function() {
+      document.getElementById("buy-credits-modal").classList.remove("hidden");
+    };
+    window.closeBuyCreditsModal = function() {
+      document.getElementById("buy-credits-modal").classList.add("hidden");
+    };
+    window.buyCredits = async function(amount) {
+      const errorEl = document.getElementById("buy-credits-error");
+      errorEl.classList.add("hidden");
+      try {
+        const res = await authFetch("/api/stripe/buy-credits", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to create checkout session");
+        window.location.href = data.checkoutUrl;
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove("hidden");
+      }
+    };
+
+    init();
+  </script>
+</body>
+</html>

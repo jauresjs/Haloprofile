@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaloProfile — Training Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    
+    .spinner {
+      border: 3px solid rgba(244, 63, 94, 0.2);
+      border-left-color: #f43f5e;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .step-active .step-icon {
+      background-color: #fef1f2;
+      border-color: #fda4af;
+      color: #f43f5e;
+    }
+    .step-completed .step-icon {
+      background-color: #f43f5e;
+      border-color: #f43f5e;
+      color: white;
+    }
+    .step-pending .step-icon {
+      background-color: #f9fafb;
+      border-color: #e5e7eb;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 flex flex-col">
+
+  <nav class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="text-xl">✨</span>
+      <span class="font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
+    </a>
+  </nav>
+
+  <main class="flex-1 max-w-2xl w-full mx-auto px-6 py-16 flex flex-col justify-center">
+    
+    <div class="bg-white rounded-3xl shadow-xl shadow-gray-100 p-8 sm:p-10 border border-gray-100">
+      
+      <div class="text-center mb-10">
+        <h1 class="text-3xl font-black text-gray-900 mb-2">Creating Your Magic ✨</h1>
+        <p class="text-gray-500">Grab a coffee, this takes ~12 minutes ☕</p>
+        <div class="mt-4 inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+          <span class="text-sm font-semibold text-gray-600">Time elapsed:</span>
+          <span id="elapsed-time" class="text-sm font-mono font-bold text-gray-900">00:00</span>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
+
+        <!-- Step 1: Upload -->
+        <div id="step-1" class="step-completed relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+            <h3 class="font-bold text-gray-900">Photos uploaded</h3>
+            <p class="text-sm text-gray-500">Successfully received your photos.</p>
+          </div>
+        </div>
+
+        <!-- Step 2: Training -->
+        <div id="step-2" class="step-active relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
+            <div id="spinner-2" class="spinner w-5 h-5"></div>
+            <svg id="check-2" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+            <h3 class="font-bold text-gray-900">Training AI model</h3>
+            <p class="text-sm text-gray-500">Learning your facial features...</p>
+          </div>
+        </div>
+
+        <!-- Step 3: Generating -->
+        <div id="step-3" class="step-pending relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
+            <div id="spinner-3" class="hidden spinner w-5 h-5"></div>
+            <svg id="check-3" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+            <h3 class="font-bold text-gray-900">Generating your photos</h3>
+            <p class="text-sm text-gray-500" id="photo-progress">Applying styles and lighting...</p>
+          </div>
+        </div>
+
+        <!-- Step 4: Done -->
+        <div id="step-4" class="step-pending relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+          <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
+             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
+          </div>
+          <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
+            <h3 class="font-bold text-gray-900">Done! 🎉</h3>
+            <p class="text-sm text-gray-500">Your photos are ready.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Button -->
+      <div id="action-container" class="mt-10 text-center hidden">
+        <a id="btn-view-photos" href="#" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-orange-600 transition-all active:scale-95">
+          View My Photos →
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { requireLogin, authFetch } from "/js/auth.js";
+
+    let jobId = null;
+    let pollInterval = null;
+    let startTime = Date.now();
+    let isCompleted = false;
+
+    // Timer logic
+    setInterval(() => {
+      if (isCompleted) return;
+      const seconds = Math.floor((Date.now() - startTime) / 1000);
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      document.getElementById("elapsed-time").textContent = `${m}:${s}`;
+    }, 1000);
+
+    async function init() {
+      await requireLogin();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const uploadId = urlParams.get('uploadId');
+      
+      if (!uploadId) {
+        alert("Missing uploadId");
+        window.location.href = "/";
+        return;
+      }
+
+      // Step 1: Poll for jobId using uploadId
+      pollInterval = setInterval(() => checkUploadStatus(uploadId), 5000);
+      checkUploadStatus(uploadId);
+    }
+
+    async function checkUploadStatus(uploadId) {
+      try {
+        const res = await authFetch(`/api/training/by-upload/${uploadId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.jobId) {
+            jobId = data.jobId;
+            clearInterval(pollInterval);
+            console.log("Job ID found:", jobId);
+            
+            // Step 2: Poll job status
+            pollInterval = setInterval(() => checkJobStatus(), 10000);
+            checkJobStatus();
+          }
+        }
+      } catch (err) {
+        console.error("Error checking upload status:", err);
+      }
+    }
+
+    async function checkJobStatus() {
+      if (!jobId) return;
+
+      try {
+        const res = await authFetch(`/api/training/status/${jobId}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        console.log("Job status:", data);
+
+        updateUI(data);
+
+        if (data.status === "completed" || data.status === "failed") {
+          clearInterval(pollInterval);
+          isCompleted = true;
+          
+          if (data.status === "completed") {
+            document.getElementById("btn-view-photos").href = `/gallery.html?jobId=${jobId}`;
+            document.getElementById("action-container").classList.remove("hidden");
+          } else {
+            alert("Training failed. Please contact support.");
+          }
+        }
+
+      } catch (err) {
+        console.error("Error checking job status:", err);
+      }
+    }
+
+    function updateUI(data) {
+      const step2 = document.getElementById("step-2");
+      const step3 = document.getElementById("step-3");
+      const step4 = document.getElementById("step-4");
+
+      if (data.status === "pending" || data.status === "training") {
+        // Step 2 is active
+      } else if (data.status === "generating") {
+        // Step 2 complete
+        step2.classList.replace("step-active", "step-completed");
+        document.getElementById("spinner-2").classList.add("hidden");
+        document.getElementById("check-2").classList.remove("hidden");
+
+        // Step 3 active
+        step3.classList.replace("step-pending", "step-active");
+        document.getElementById("spinner-3").classList.remove("hidden");
+      } else if (data.status === "completed") {
+        // Step 2 complete
+        step2.classList.replace("step-active", "step-completed");
+        step2.classList.replace("step-pending", "step-completed"); // fallback
+        document.getElementById("spinner-2").classList.add("hidden");
+        document.getElementById("check-2").classList.remove("hidden");
+
+        // Step 3 complete
+        step3.classList.replace("step-active", "step-completed");
+        step3.classList.replace("step-pending", "step-completed"); // fallback
+        document.getElementById("spinner-3").classList.add("hidden");
+        document.getElementById("check-3").classList.remove("hidden");
+
+        // Step 4 complete
+        step4.classList.replace("step-pending", "step-completed");
+      }
+    }
+
+    init();
+  </script>
+
+</body>
+</html>

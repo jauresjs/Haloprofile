@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaloProfile — AI Dating Photos That Get Matches</title>
+  <meta name="description" content="Upload 15 photos and get stunning AI-generated profile pictures in minutes. More matches. More dates. HaloProfile." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .glow { text-shadow: 0 0 80px rgba(251,113,133,0.4); }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+    .float { animation: float 4s ease-in-out infinite; }
+    .float-delay { animation: float 4s ease-in-out 1.5s infinite; }
+  </style>
+</head>
+<body class="bg-white overflow-x-hidden">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2">
+        <span class="text-2xl">✨</span>
+        <span class="text-xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="/gallery.html" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">My Gallery</a>
+        <a href="/auth.html" id="nav-login" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Log in</a>
+        <a href="/auth.html" id="nav-cta"
+           class="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 text-white text-sm font-semibold rounded-full hover:from-rose-600 hover:to-orange-600 transition-all shadow-md shadow-rose-200 active:scale-95">
+          Get Started
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+
+    <!-- Background gradient blobs -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-[700px] h-[700px] bg-gradient-to-br from-rose-300 to-orange-200 rounded-full blur-3xl opacity-30"></div>
+      <div class="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-gradient-to-tr from-amber-200 to-rose-200 rounded-full blur-3xl opacity-25"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-gradient-to-r from-rose-100 to-orange-100 rounded-full blur-2xl opacity-40"></div>
+    </div>
+
+    <div class="relative max-w-6xl mx-auto px-6 py-24 grid lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: Copy -->
+      <div>
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2 bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold px-4 py-2 rounded-full mb-6">
+          <span class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+          AI-Powered · Results in Minutes
+        </div>
+
+        <h1 class="text-5xl lg:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight glow mb-6">
+          Your Best<br/>
+          <span class="bg-gradient-to-r from-rose-500 via-rose-400 to-orange-400 bg-clip-text text-transparent">
+            Dating Photos,
+          </span><br/>
+          AI-Powered.
+        </h1>
+
+        <p class="text-xl text-gray-500 leading-relaxed mb-10 max-w-lg">
+          Upload <strong class="text-gray-700">15 photos</strong>. Get stunning, professionally styled profile pictures in minutes — trained on <em>you</em>.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="/auth.html" id="hero-cta"
+            class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-base rounded-2xl hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-300/50 active:scale-95">
+            ✨ Get Started — It's Free
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#how-it-works"
+            class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white border border-gray-200 text-gray-700 font-semibold text-base rounded-2xl hover:bg-gray-50 transition-all">
+            See how it works
+          </a>
+        </div>
+
+        <!-- Social proof -->
+        <div class="mt-10 flex items-center gap-4">
+          <div class="flex -space-x-2">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-300 to-orange-300 border-2 border-white flex items-center justify-center text-xs font-bold text-white">S</div>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-300 to-rose-300 border-2 border-white flex items-center justify-center text-xs font-bold text-white">M</div>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 to-rose-300 border-2 border-white flex items-center justify-center text-xs font-bold text-white">J</div>
+          </div>
+          <p class="text-sm text-gray-500">
+            <strong class="text-gray-800">1,200+</strong> people got more matches this week
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Photo grid mockup -->
+      <div class="hidden lg:flex items-center justify-center gap-6 relative w-full h-[400px]">
+        <!-- Card 1 (Before) -->
+        <div class="w-48 h-64 rounded-3xl shadow-xl shadow-rose-200 flex items-end justify-center pb-4 overflow-hidden border border-rose-100 bg-gray-200 relative shrink-0" style="background-image: url('/demo.png'); background-size: cover; background-position: center;">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+          <div class="relative z-10 text-center">
+            <div class="text-xs font-semibold text-gray-900 bg-white/90 backdrop-blur px-3 py-1 rounded-full shadow-sm">Before (Selfie)</div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="text-4xl text-rose-300 animate-pulse shrink-0">
+          →
+        </div>
+
+        <!-- Card 2 (After) -->
+        <div class="w-56 h-80 rounded-3xl shadow-2xl shadow-orange-200 flex items-end justify-center pb-4 overflow-hidden border border-orange-100 bg-gray-200 relative shrink-0" style="background-image: url('/generated_demo.jpg'); background-size: cover; background-position: center;">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+          <div class="relative z-10 text-center">
+            <div class="text-sm font-bold text-white bg-rose-500/90 backdrop-blur px-4 py-1.5 rounded-full shadow-sm">After ✨</div>
+          </div>
+        </div>
+        
+        <!-- Badge -->
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-xl px-5 py-3 flex items-center gap-2 border border-gray-100 whitespace-nowrap z-20">
+          <span class="text-lg">🔥</span>
+          <div>
+            <p class="text-xs font-bold text-gray-800">3x more matches</p>
+            <p class="text-xs text-gray-400">avg. after HaloProfile</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" class="py-24 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-black text-gray-900 mb-4">How it works</h2>
+        <p class="text-lg text-gray-500">Three simple steps to photos that get swipes</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+          <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">📤</div>
+          <div class="text-sm font-bold text-rose-500 mb-2">Step 1</div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Upload your photos</h3>
+          <p class="text-sm text-gray-500">Upload 15–20 selfies and casual photos. No professional shoot needed.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+          <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">🤖</div>
+          <div class="text-sm font-bold text-orange-500 mb-2">Step 2</div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">AI learns your look</h3>
+          <p class="text-sm text-gray-500">Our model trains on your face and generates photos in dozens of styles.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+          <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">🌟</div>
+          <div class="text-sm font-bold text-amber-500 mb-2">Step 3</div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Download & glow up</h3>
+          <p class="text-sm text-gray-500">Pick your favorites, download, and update your profile. More matches incoming.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us -->
+  <section id="about" class="py-24 bg-white border-t border-gray-100">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <div class="inline-flex items-center gap-2 bg-rose-50 text-rose-600 text-xs font-semibold px-4 py-2 rounded-full mb-6">Our Purpose</div>
+      <h2 class="text-4xl font-black text-gray-900 mb-6">Why we built HaloProfile</h2>
+      <p class="text-lg text-gray-600 leading-relaxed mb-6">
+        Online dating is brutal, and your photos are the only thing standing between you and the matches you deserve. 
+        Most people don't have professional photographers following them around, and taking selfies in your bathroom mirror just doesn't cut it anymore.
+      </p>
+      <p class="text-lg text-gray-600 leading-relaxed">
+        We built HaloProfile to level the playing field. By combining cutting-edge AI with expert photography framing, we give everyone access to top-tier, authentic-looking dating photos. Our mission is to help you put your best foot forward and confidently find your next great date.
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-24 bg-gray-50 border-t border-gray-100">
+    <div class="max-w-3xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-black text-gray-900 mb-4">Frequently Asked Questions</h2>
+      </div>
+      <div class="space-y-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h4 class="text-lg font-bold text-gray-900 mb-2">What kind of photos should I upload?</h4>
+          <p class="text-gray-600">For the best results, upload 15-20 clear photos of your face. Use a mix of angles, expressions, and lighting. Avoid group shots, sunglasses, or heavy filters.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h4 class="text-lg font-bold text-gray-900 mb-2">Are the generated photos realistic?</h4>
+          <p class="text-gray-600">Yes! Our custom AI is trained specifically to retain your natural facial features, skin texture, and body type. It looks just like you, on your very best day.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h4 class="text-lg font-bold text-gray-900 mb-2">What happens to my uploaded photos?</h4>
+          <p class="text-gray-600">Your privacy is our priority. Your original photos are used solely to train your personal AI model and are securely processed. We do not sell your data.</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h4 class="text-lg font-bold text-gray-900 mb-2">Can I cancel my subscription?</h4>
+          <p class="text-gray-600">Absolutely. You can cancel your subscription at any time directly from your dashboard. Your unused credits will remain valid until the end of your billing cycle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-24 bg-gradient-to-br from-rose-500 to-orange-500">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+      <h2 class="text-4xl font-black text-white mb-4">Ready to glow up your profile?</h2>
+      <p class="text-rose-100 text-lg mb-8">Join thousands who already get more dates with HaloProfile.</p>
+      <a href="/auth.html"
+        class="inline-flex items-center gap-2 px-8 py-4 bg-white text-rose-600 font-bold text-base rounded-2xl hover:bg-rose-50 transition-all shadow-xl active:scale-95">
+        ✨ Get Started Free
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-gray-100">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-2">
+        <span>✨</span>
+        <span class="font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="/terms.html" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Terms of Service</a>
+        <a href="/privacy.html" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Privacy Policy</a>
+      </div>
+      <p class="text-sm text-gray-400">© 2025 HaloProfile. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { supabase } from "/js/auth.js";
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const navLogin = document.getElementById("nav-login");
+      if (navLogin) navLogin.classList.add("hidden");
+      
+      const navCta = document.getElementById("nav-cta");
+      if (navCta) {
+        navCta.textContent = "Dashboard";
+        navCta.href = "/gallery.html";
+      }
+      
+      const heroCta = document.getElementById("hero-cta");
+      if (heroCta) {
+        heroCta.innerHTML = `✨ Go to Dashboard <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>`;
+        heroCta.href = "/gallery.html";
+      }
+    }
+  </script>
+</body>
+</html>
