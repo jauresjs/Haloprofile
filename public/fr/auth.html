@@ -19,7 +19,7 @@
         <span class="text-3xl">✨</span>
         <span class="text-2xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
       </a>
-      <p class="text-gray-500 text-sm mt-2">Vos photos de dating par IA</p>
+      <p class="text-gray-500 text-sm mt-2">Vos photos de profil par IA</p>
     </div>
 
     <!-- Card -->
@@ -91,7 +91,7 @@
     </div>
 
     <p class="text-center text-xs text-gray-400 mt-6">
-      En continuant, vous acceptez nos Conditions d'Utilisation et notre Politique de Confidentialité.
+      En continuant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
     </p>
   </div>
 
@@ -121,7 +121,7 @@
         signupTab.classList.remove("text-gray-400", "border-transparent");
         loginTab.classList.remove("text-rose-600", "border-rose-500");
         loginTab.classList.add("text-gray-400", "border-transparent");
-        submitBtn.textContent = "Créer un Compte";
+        submitBtn.textContent = "Créer un compte";
         hint.innerHTML = `Déjà un compte ? <button onclick="switchTab('login')" class="text-rose-500 font-semibold hover:underline">Connectez-vous</button>`;
       }
     };
@@ -133,12 +133,12 @@
       const btn = document.getElementById("btn-submit");
 
       if (!email || !password) {
-        showError("Veuillez entrer votre email et votre mot de passe.");
+        showError("Veuillez renseigner votre email et votre mot de passe.");
         return;
       }
 
       btn.disabled = true;
-      btn.textContent = currentTab === "login" ? "Connexion en cours…" : "Création du compte…";
+      btn.textContent = currentTab === "login" ? "Connexion en cours…" : "Création de votre compte…";
 
       try {
         if (currentTab === "login") {
@@ -149,7 +149,7 @@
           if (data.session) {
             window.location.href = "/fr/upload.html";
           } else {
-            showSuccess("Vérifiez vos emails pour confirmer votre compte, puis connectez-vous.");
+            showSuccess("Un email de confirmation vous a été envoyé. Vérifiez votre boîte de réception, puis connectez-vous.");
             switchTab("login");
           }
         }
@@ -157,7 +157,7 @@
         showError(err.message || "Une erreur est survenue. Veuillez réessayer.");
       } finally {
         btn.disabled = false;
-        btn.textContent = currentTab === "login" ? "Connexion" : "Créer un Compte";
+        btn.textContent = currentTab === "login" ? "Connexion" : "Créer un compte";
       }
     };
 
@@ -187,7 +187,6 @@
       document.getElementById("success-msg").classList.add("hidden");
     }
 
-    // Allow Enter key to submit
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter") handleSubmit();
     });

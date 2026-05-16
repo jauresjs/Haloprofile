@@ -202,8 +202,8 @@
           <div id="settings-status" class="hidden text-sm text-center font-medium py-2 rounded-lg"></div>
 
           <div class="flex gap-3">
-            <button onclick="closeSettings()" class="flex-1 py-3 border-2 border-gray-200 text-gray-600 font-semibold rounded-xl hover:border-gray-300 transition-all text-sm">Annuler</button>
-            <button id="btn-save-settings" onclick="saveSettings()" class="flex-1 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl shadow-md transition-all text-sm hover:from-rose-600 hover:to-orange-600 active:scale-95">Enregistrer</button>
+          <button onclick="closeSettings()" class="flex-1 py-3 border-2 border-gray-200 text-gray-600 font-semibold rounded-xl hover:border-gray-300 transition-all text-sm">Annuler</button>
+            <button id="btn-save-settings" onclick="saveSettings()" class="flex-1 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl shadow-md transition-all text-sm hover:from-rose-600 hover:to-orange-600 active:scale-95">Sauvegarder</button>
           </div>
         </div>
       </div>
@@ -601,24 +601,24 @@
       const btn = document.getElementById("btn-save-settings");
       const statusEl = document.getElementById("settings-status");
       btn.disabled = true;
-      btn.textContent = "Enregistrement…";
+      btn.textContent = "Sauvegarde en cours…";
       statusEl.classList.add("hidden");
       try {
         await updateProfile({ gender: pendingGender, shot_type: pendingShotType });
         userGender = pendingGender;
         userShotType = pendingShotType;
         applyGenerateShotUI(userShotType);
-        statusEl.textContent = "✅ Enregistré !";
+        statusEl.textContent = "✅ Sauvegardé !";
         statusEl.className = "text-sm text-center font-medium py-2 rounded-lg bg-green-50 text-green-700";
         statusEl.classList.remove("hidden");
         setTimeout(() => closeSettings(), 900);
       } catch (err) {
-        statusEl.textContent = "❌ Échec de l'enregistrement. Veuillez réessayer.";
+        statusEl.textContent = "❌ Erreur lors de la sauvegarde. Veuillez réessayer.";
         statusEl.className = "text-sm text-center font-medium py-2 rounded-lg bg-red-50 text-red-600";
         statusEl.classList.remove("hidden");
       } finally {
         btn.disabled = false;
-        btn.textContent = "Enregistrer";
+        btn.textContent = "Sauvegarder";
       }
     };
 
