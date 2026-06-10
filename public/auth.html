@@ -98,7 +98,7 @@
   </div>
 
   <script type="module">
-    import { login, signup, loginWithGoogle } from "/js/auth.js";
+    import { login, signup, loginWithGoogle, getToken } from "/js/auth.js";
     document.getElementById('lang-toggle').addEventListener('click', () => {
       window.location.href = '/fr/auth.html';
     });
@@ -151,8 +151,21 @@
           window.location.href = "/upload.html";
         } else {
           const data = await signup(email, password);
+          // Send welcome email (non-blocking)
+          const isFrench = window.location.pathname.startsWith("/fr/");
+          const locale = isFrench ? "fr" : "en";
+          try {
+            const token = await getToken();
+            if (token) {
+              fetch("/api/auth/welcome", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ locale }),
+              }).catch(() => {});
+            }
+          } catch (e) { /* non-blocking */ }
           if (data.session) {
-            window.location.href = "/upload.html";
+            window.location.href = isFrench ? "/fr/upload.html" : "/upload.html";
           } else {
             showSuccess("Check your email to confirm your account, then log in.");
             switchTab("login");

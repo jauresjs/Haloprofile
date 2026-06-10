@@ -4,6 +4,10 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 import { supabase } from "./lib/supabase.js";
 import { requireAuth } from "./middleware/auth.js";
+import authRouter from "./routes/auth.js";
+import trainingRouter from "./routes/training.js";
+import photosRouter from "./routes/photos.js";
+import stripeRouter from "./routes/stripe.js";
 import uploadRouter from "./routes/upload.js";
 
 const app = express();
@@ -77,19 +81,19 @@ app.get("/api/me", requireAuth, (req, res) => {
   res.json({ user: req.user });
 });
 
+// Auth routes (welcome email, etc.)
+app.use("/api/auth", authRouter);
+
 // Upload routes
 app.use("/api/upload", uploadRouter);
 
 // Training routes
-import trainingRouter from "./routes/training.js";
 app.use("/api/training", trainingRouter);
 
 // Photos routes
-import photosRouter from "./routes/photos.js";
 app.use("/api/photos", photosRouter);
 
 // Stripe routes
-import stripeRouter from "./routes/stripe.js";
 app.use("/api/stripe", stripeRouter);
 
 app.listen(PORT, () => {

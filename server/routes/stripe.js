@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
 import { stripe } from "../lib/stripe.js";
 import { fal } from "@fal-ai/client";
+import { sendPaymentConfirmationEmail } from "../lib/email.js";
 
 const router = Router();
 
@@ -63,6 +64,7 @@ router.post("/create-checkout", requireAuth, async (req, res) => {
         userId,
         uploadId,
         gender: safeGender,
+        locale: locale || "en",
       },
     });
 
@@ -169,8 +171,9 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
     }
 
     if (type === "subscription") {
-      const { uploadId, gender } = session.metadata;
+      const { uploadId, gender, locale } = session.metadata;
       const safeGender = gender === "female" ? "female" : "male";
+      const userLocale = locale === "fr" ? "fr" : "en";
 
       console.log(`[Stripe Webhook] Subscription successful for user ${userId}`);
 
@@ -207,7 +210,13 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
           status: "paid",
         });
 
-        // 3. Fetch upload row
+        // 3. Save locale preference on profile
+        await supabaseAdmin
+          .from("profiles")
+          .update({ locale: userLocale })
+          .eq("id", userId);
+
+        // 4. Fetch upload row
         const { data: upload } = await supabaseAdmin
           .from("uploads")
           .select("zip_url, photo_count")
@@ -272,6 +281,21 @@ router.post("/webhook", express.raw({ type: "application/json" }), async (req, r
           .eq("id", uploadId);
 
         console.log(`[Stripe Webhook] Successfully initiated training for job ${job.id}`);
+
+        // 6. Send payment confirmation email (non-blocking)
+        const customerEmail = session.customer_email || session.customer_details?.email;
+        if (customerEmail) {
+          sendPaymentConfirmationEmail(customerEmail, userLocale, {
+            amount: session.amount_total || SUBSCRIPTION_PRICE,
+            currency: session.currency || "usd",
+            uploadId,
+            plan: "premium_subscription",
+          }).then((sent) => {
+            if (sent) {
+              console.log(`[Stripe Webhook] Payment confirmation email sent to ${customerEmail}`);
+            }
+          });
+        }
       } catch (err) {
         console.error("[Stripe Webhook] Failed to process subscription order:", err.message);
       }
@@ -532,6 +556,7 @@ router.post("/checkout-with-discount", requireAuth, async (req, res) => {
         uploadId,
         gender: safeGender,
         discountCode,
+        locale: locale || "en",
       },
     });
 

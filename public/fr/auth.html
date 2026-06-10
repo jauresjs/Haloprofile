@@ -97,7 +97,7 @@
   </div>
 
   <script type="module">
-    import { login, signup, loginWithGoogle } from "/js/auth.js";
+    import { login, signup, loginWithGoogle, getToken } from "/js/auth.js";
     document.getElementById('lang-toggle').addEventListener('click', () => {
       window.location.href = '/auth.html';
     });
@@ -150,6 +150,17 @@
           window.location.href = "/fr/upload.html";
         } else {
           const data = await signup(email, password);
+          // Send welcome email (non-blocking) — French locale
+          try {
+            const token = await getToken();
+            if (token) {
+              fetch("/api/auth/welcome", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ locale: "fr" }),
+              }).catch(() => {});
+            }
+          } catch (e) { /* non-blocking */ }
           if (data.session) {
             window.location.href = "/fr/upload.html";
           } else {

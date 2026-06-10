@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
-// Removed generateAllPhotos import
+import { sendTrainingCompleteEmail } from "../lib/email.js";
 
 const router = Router();
 
@@ -36,7 +36,7 @@ router.post("/webhook", async (req, res) => {
       return res.status(400).json({ error: "Invalid payload" });
     }
 
-    // Update job to completed
+    // Update job to completed — also select user_id and upload_id for the email
     const { data: job, error: updateError } = await supabaseAdmin
       .from("training_jobs")
       .update({
@@ -45,7 +45,7 @@ router.post("/webhook", async (req, res) => {
         completed_at: new Date().toISOString(),
       })
       .eq("fal_request_id", falRequestId)
-      .select("id")
+      .select("id, user_id, upload_id, trigger_word")
       .single();
 
     if (updateError || !job) {
@@ -54,6 +54,32 @@ router.post("/webhook", async (req, res) => {
     }
 
     console.log(`[Webhook] Job ${job.id} marked as completed.`);
+
+    // Send training complete email (non-blocking)
+    try {
+      // Fetch user's email and locale preference
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("email, locale")
+        .eq("id", job.user_id)
+        .single();
+
+      if (profile?.email) {
+        const userLocale = profile.locale === "fr" ? "fr" : "en";
+        sendTrainingCompleteEmail(profile.email, userLocale, {
+          jobId: job.id,
+          uploadId: job.upload_id,
+          triggerWord: job.trigger_word,
+        }).then((sent) => {
+          if (sent) {
+            console.log(`[Webhook] Training complete email sent to ${profile.email}`);
+          }
+        });
+      }
+    } catch (emailErr) {
+      console.error("[Webhook] Failed to send training complete email:", emailErr.message);
+    }
+
     return res.status(200).send("OK");
   } catch (error) {
     console.error("[Webhook] Unhandled error:", error);
