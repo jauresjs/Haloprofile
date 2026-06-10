@@ -219,7 +219,7 @@
 
       <div class="plan-card w-full bg-gradient-to-br from-white/10 to-white/5 border border-rose-500/30 rounded-3xl p-8 mb-6 relative overflow-hidden">
         <div class="absolute top-4 right-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-black uppercase px-3 py-1 rounded-full">Le plus populaire</div>
-        <div class="text-5xl font-black text-white mb-1">29,99 $<span class="text-xl text-white/40 font-normal">/mois</span></div>
+        <div class="text-5xl font-black text-white mb-1">49,99 $<span class="text-xl text-white/40 font-normal">/mois</span></div>
         <div class="text-rose-400 font-semibold mb-6">Offre Premium</div>
         <ul class="text-left space-y-3 mb-8">
           <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> <strong class="text-white">500 crédits par mois</strong> (20 photos)</li>
@@ -229,12 +229,50 @@
           <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> Téléchargements HD, annulation à tout moment</li>
         </ul>
         <button id="checkout-btn" onclick="goToCheckout()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/40 active:scale-95">
-          ✨ Débloquer Mes Photos — 29,99 $/mois
+          ✨ Débloquer Mes Photos — 49,99 $/mois
         </button>
       </div>
 
       <p id="checkout-error" class="hidden text-red-400 text-sm mb-4"></p>
       <p class="text-white/30 text-xs">Sans frais cachés · Annulation à tout moment · Paiement sécurisé via Stripe</p>
+    </div>
+
+    <!-- ──────────────── EXIT-INTENT DISCOUNT MODAL (FR) ──────────── -->
+    <div id="exit-discount-modal" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-gradient-to-br from-gray-900 to-gray-950 border border-rose-500/30 rounded-3xl shadow-2xl shadow-rose-500/20 w-full max-w-lg overflow-hidden transform transition-all">
+        <div class="flex justify-end pt-4 pr-4">
+          <button onclick="closeExitDiscount()" class="text-white/30 hover:text-white/60 transition-colors text-lg font-bold" id="exit-discount-close-btn">✕</button>
+        </div>
+        <div class="px-8 pb-8 text-center">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-3xl animate-pulse">🔥</div>
+          <h2 class="text-2xl font-black text-white mb-2">Ne partez pas !</h2>
+          <p class="text-white/60 mb-6">Voici <strong class="text-rose-400">50 % de réduction</strong> rien que pour vous — premier mois uniquement.</p>
+
+          <div class="flex items-center justify-center gap-4 mb-6">
+            <div class="text-center">
+              <p class="text-white/40 text-xs line-through mb-1">49,99 $</p>
+              <p class="text-white/40 text-xs">/mois</p>
+            </div>
+            <span class="text-3xl font-black text-white">→</span>
+            <div class="text-center">
+              <p class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">24,99 $</p>
+              <p class="text-white/50 text-xs">/mois premier mois</p>
+            </div>
+          </div>
+
+          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-400 text-sm font-bold mb-6" id="exit-discount-timer">
+            ⏳ Expire dans 2 heures
+          </div>
+
+          <button id="exit-claim-btn" onclick="claimDiscount()"
+            class="w-full py-4 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-black text-lg hover:from-rose-600 hover:to-orange-600 transition-all shadow-xl shadow-rose-500/40 active:scale-95 mb-3">
+            🔥 Réclamer 50 % de réduction
+          </button>
+
+          <p class="text-white/30 text-xs">Après le premier mois, abonnement à 49,99 $/mois · Annulation à tout moment</p>
+          <p class="text-white/20 text-xs mt-2">⛔ Sans frais cachés · Annulez à tout moment depuis votre compte</p>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -274,6 +312,118 @@
       document.getElementById("gender-female").classList.toggle("selected", gender === "female");
     };
 
+    // ─── Exit-Intent Discount Logic (FR) ──────────────────────
+    let exitDiscountShown = false;
+    let exitDiscountData = null;
+    let exitCountdownInterval = null;
+
+    document.addEventListener('mouseleave', (e) => {
+      if (e.clientY > 0) return;
+      const pricingSlide = document.getElementById('slide-7');
+      if (!pricingSlide?.classList.contains('active')) return;
+      if (exitDiscountShown) return;
+      if (document.getElementById('exit-claim-btn').disabled) return;
+
+      exitDiscountShown = true;
+      showExitDiscount();
+    });
+
+    window.showExitDiscount = async () => {
+      const modal = document.getElementById('exit-discount-modal');
+      modal.classList.remove('hidden');
+
+      const uploadId = localStorage.getItem('haloprofile_uploadId') || '';
+
+      try {
+        const token = await getToken();
+        const res = await fetch('/api/stripe/generate-discount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ uploadId }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        exitDiscountData = data;
+        startExitCountdown(data.expiresAt);
+      } catch (err) {
+        console.error('Exit discount error:', err);
+        document.getElementById('exit-discount-timer').textContent = '⏳ Offre à durée limitée';
+      }
+    };
+
+    function startExitCountdown(expiresAt) {
+      const timerEl = document.getElementById('exit-discount-timer');
+      if (exitCountdownInterval) clearInterval(exitCountdownInterval);
+
+      function update() {
+        const now = Date.now();
+        const expiry = new Date(expiresAt).getTime();
+        const diff = Math.max(0, expiry - now);
+
+        if (diff <= 0) {
+          timerEl.textContent = '⏳ Offre expirée';
+          clearInterval(exitCountdownInterval);
+          return;
+        }
+
+        const hours = Math.floor(diff / 3600000);
+        const minutes = Math.floor((diff % 3600000) / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        if (hours > 0) {
+          timerEl.textContent = `⏳ Expire dans ${hours}h ${minutes}m`;
+        } else {
+          timerEl.textContent = `⏳ Expire dans ${minutes}m ${seconds}s`;
+        }
+      }
+
+      update();
+      exitCountdownInterval = setInterval(update, 1000);
+    }
+
+    window.claimDiscount = async () => {
+      const btn = document.getElementById('exit-claim-btn');
+      const closeBtn = document.getElementById('exit-discount-close-btn');
+      btn.disabled = true;
+      btn.textContent = 'Redirection…';
+      closeBtn.disabled = true;
+
+      try {
+        const token = await getToken();
+        const uploadId = localStorage.getItem('haloprofile_uploadId') || '';
+        const discountCode = exitDiscountData?.discountCode || '';
+
+        const res = await fetch('/api/stripe/checkout-with-discount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ plan: 'premium', uploadId, gender: selectedGender, discountCode, locale: 'fr' }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        if (exitCountdownInterval) clearInterval(exitCountdownInterval);
+        window.location.href = data.checkoutUrl;
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = '🔥 Réclamer 50 % de réduction';
+        closeBtn.disabled = false;
+        console.error('Claim discount error:', err);
+        alert('Échec de la création du paiement. Veuillez réessayer.');
+      }
+    };
+
+    window.closeExitDiscount = () => {
+      const modal = document.getElementById('exit-discount-modal');
+      modal.classList.add('hidden');
+      if (exitCountdownInterval) {
+        clearInterval(exitCountdownInterval);
+        exitCountdownInterval = null;
+      }
+    };
+
     window.goToCheckout = async () => {
       const btn     = document.getElementById("checkout-btn");
       const errorEl = document.getElementById("checkout-error");
@@ -288,7 +438,7 @@
         const res = await fetch("/api/stripe/create-checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ plan: "premium", uploadId, gender: selectedGender }),
+          body: JSON.stringify({ plan: "premium", uploadId, gender: selectedGender, locale: "fr" }),
         });
 
         const data = await res.json();
@@ -297,7 +447,7 @@
 
       } catch (err) {
         btn.disabled    = false;
-        btn.textContent = "✨ Débloquer Mes Photos — 29,99 $/mois";
+        btn.textContent = "✨ Débloquer Mes Photos — 49,99 $/mois";
         errorEl.textContent = err.message;
         errorEl.classList.remove("hidden");
       }

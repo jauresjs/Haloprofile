@@ -14,12 +14,13 @@
 
   <div class="w-full max-w-md">
     <!-- Logo -->
-    <div class="text-center mb-8">
+    <div class="text-center mb-8 relative">
       <a href="/fr/" class="inline-flex items-center gap-2">
         <span class="text-3xl">✨</span>
         <span class="text-2xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
       </a>
       <p class="text-gray-500 text-sm mt-2">Vos photos de profil par IA</p>
+      <a id="lang-toggle" class="absolute top-0 right-0 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">🇬🇧 EN</a>
     </div>
 
     <!-- Card -->
@@ -97,6 +98,9 @@
 
   <script type="module">
     import { login, signup, loginWithGoogle } from "/js/auth.js";
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      window.location.href = '/auth.html';
+    });
 
     let currentTab = "login";
 

@@ -11,3 +11,9 @@ dist/
 build/
 .next/
 *.tsbuildinfo
+
+# Scratch / local testing
+scratch/
+.vscode/
+supabase/.temp/
+write-status.js.bak

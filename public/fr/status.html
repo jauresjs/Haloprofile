@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HaloProfile — Training Status</title>
+  <title>HaloProfile — Statut de l'entraînement</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -39,7 +39,7 @@
 <body class="min-h-screen bg-gray-50 flex flex-col">
 
   <nav class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2">
+    <a href="/fr/" class="flex items-center gap-2">
       <span class="text-xl">✨</span>
       <span class="font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
     </a>
@@ -50,69 +50,69 @@
     <div class="bg-white rounded-3xl shadow-xl shadow-gray-100 p-8 sm:p-10 border border-gray-100">
       
       <div class="text-center mb-10">
-        <h1 class="text-3xl font-black text-gray-900 mb-2">Creating Your Magic ✨</h1>
-        <p class="text-gray-500">Grab a coffee, this takes ~12 minutes ☕</p>
+        <h1 class="text-3xl font-black text-gray-900 mb-2">Création de votre magie ✨</h1>
+        <p class="text-gray-500">Prenez un café, ça prend ~12 minutes ☕</p>
         <div class="mt-4 inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
-          <span class="text-sm font-semibold text-gray-600">Time elapsed:</span>
+          <span class="text-sm font-semibold text-gray-600">Temps écoulé :</span>
           <span id="elapsed-time" class="text-sm font-mono font-bold text-gray-900">00:00</span>
         </div>
       </div>
 
-      <!-- Steps -->
+      <!-- Étapes -->
       <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
 
-        <!-- Step 1: Upload -->
+        <!-- Étape 1 : Upload -->
         <div id="step-1" class="step-completed relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
           <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
           </div>
           <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
-            <h3 class="font-bold text-gray-900">Photos uploaded</h3>
-            <p class="text-sm text-gray-500">Successfully received your photos.</p>
+            <h3 class="font-bold text-gray-900">Photos téléversées</h3>
+            <p class="text-sm text-gray-500">Vos photos ont bien été reçues.</p>
           </div>
         </div>
 
-        <!-- Step 2: Training -->
+        <!-- Étape 2 : Entraînement -->
         <div id="step-2" class="step-active relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
           <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
             <div id="spinner-2" class="spinner w-5 h-5"></div>
             <svg id="check-2" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
           </div>
           <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
-            <h3 class="font-bold text-gray-900">Training AI model</h3>
-            <p class="text-sm text-gray-500">Learning your facial features...</p>
+            <h3 class="font-bold text-gray-900">Entraînement du modèle IA</h3>
+            <p class="text-sm text-gray-500">Apprentissage de vos traits faciaux…</p>
           </div>
         </div>
 
-        <!-- Step 3: Generating -->
+        <!-- Étape 3 : Génération -->
         <div id="step-3" class="step-pending relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
           <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
             <div id="spinner-3" class="hidden spinner w-5 h-5"></div>
             <svg id="check-3" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
           </div>
           <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
-            <h3 class="font-bold text-gray-900">Generating your photos</h3>
-            <p class="text-sm text-gray-500" id="photo-progress">Applying styles and lighting...</p>
+            <h3 class="font-bold text-gray-900">Génération de vos photos</h3>
+            <p class="text-sm text-gray-500" id="photo-progress">Application des styles et éclairages…</p>
           </div>
         </div>
 
-        <!-- Step 4: Done -->
+        <!-- Étape 4 : Terminé -->
         <div id="step-4" class="step-pending relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
           <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 step-icon z-10 transition-colors">
              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
           </div>
           <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
-            <h3 class="font-bold text-gray-900">Done! 🎉</h3>
-            <p class="text-sm text-gray-500">Your photos are ready.</p>
+            <h3 class="font-bold text-gray-900">Terminé ! 🎉</h3>
+            <p class="text-sm text-gray-500">Vos photos sont prêtes.</p>
           </div>
         </div>
 
       </div>
 
-      <!-- Action Button -->
+      <!-- Bouton d'action -->
       <div id="action-container" class="mt-10 text-center hidden">
         <a id="btn-view-photos" href="#" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:from-rose-600 hover:to-orange-600 transition-all active:scale-95">
-          View My Photos →
+          Voir mes photos →
         </a>
       </div>
 
@@ -127,7 +127,7 @@
     let startTime = Date.now();
     let isCompleted = false;
 
-    // Timer logic
+    // Timer
     setInterval(() => {
       if (isCompleted) return;
       const seconds = Math.floor((Date.now() - startTime) / 1000);
@@ -143,12 +143,12 @@
       const uploadId = urlParams.get('uploadId');
       
       if (!uploadId) {
-        alert("Missing uploadId");
-        window.location.href = "/";
+        alert("UploadId manquant");
+        window.location.href = "/fr/";
         return;
       }
 
-      // Step 1: Poll for jobId using uploadId
+      // Étape 1 : Récupérer le jobId via uploadId
       pollInterval = setInterval(() => checkUploadStatus(uploadId), 5000);
       checkUploadStatus(uploadId);
     }
@@ -161,15 +161,15 @@
           if (data.jobId) {
             jobId = data.jobId;
             clearInterval(pollInterval);
-            console.log("Job ID found:", jobId);
+            console.log("Job ID trouvé :", jobId);
             
-            // Step 2: Poll job status
+            // Étape 2 : Vérifier le statut du job
             pollInterval = setInterval(() => checkJobStatus(), 10000);
             checkJobStatus();
           }
         }
       } catch (err) {
-        console.error("Error checking upload status:", err);
+        console.error("Erreur lors du check du statut upload :", err);
       }
     }
 
@@ -181,7 +181,7 @@
         if (!res.ok) return;
 
         const data = await res.json();
-        console.log("Job status:", data);
+        console.log("Statut du job :", data);
 
         updateUI(data);
 
@@ -190,15 +190,15 @@
           isCompleted = true;
           
           if (data.status === "completed") {
-            document.getElementById("btn-view-photos").href = `/gallery.html?jobId=${jobId}`;
+            document.getElementById("btn-view-photos").href = `/fr/gallery.html?jobId=${jobId}`;
             document.getElementById("action-container").classList.remove("hidden");
           } else {
-            alert("Training failed. Please contact support.");
+            alert("L'entraînement a échoué. Veuillez contacter le support.");
           }
         }
 
       } catch (err) {
-        console.error("Error checking job status:", err);
+        console.error("Erreur lors du check du statut du job :", err);
       }
     }
 
@@ -208,30 +208,30 @@
       const step4 = document.getElementById("step-4");
 
       if (data.status === "pending" || data.status === "training") {
-        // Step 2 is active
+        // Étape 2 active
       } else if (data.status === "generating") {
-        // Step 2 complete
+        // Étape 2 terminée
         step2.classList.replace("step-active", "step-completed");
         document.getElementById("spinner-2").classList.add("hidden");
         document.getElementById("check-2").classList.remove("hidden");
 
-        // Step 3 active
+        // Étape 3 active
         step3.classList.replace("step-pending", "step-active");
         document.getElementById("spinner-3").classList.remove("hidden");
       } else if (data.status === "completed") {
-        // Step 2 complete
+        // Étape 2 terminée
         step2.classList.replace("step-active", "step-completed");
-        step2.classList.replace("step-pending", "step-completed"); // fallback
+        step2.classList.replace("step-pending", "step-completed");
         document.getElementById("spinner-2").classList.add("hidden");
         document.getElementById("check-2").classList.remove("hidden");
 
-        // Step 3 complete
+        // Étape 3 terminée
         step3.classList.replace("step-active", "step-completed");
-        step3.classList.replace("step-pending", "step-completed"); // fallback
+        step3.classList.replace("step-pending", "step-completed");
         document.getElementById("spinner-3").classList.add("hidden");
         document.getElementById("check-3").classList.remove("hidden");
 
-        // Step 4 complete
+        // Étape 4 terminée
         step4.classList.replace("step-pending", "step-completed");
       }
     }

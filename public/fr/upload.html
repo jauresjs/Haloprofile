@@ -30,8 +30,8 @@
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl overflow-hidden">
       <div class="bg-gradient-to-r from-rose-500 to-orange-500 px-8 py-6 text-center">
         <p class="text-rose-100 text-sm font-medium mb-1">🎉 Photos envoyées avec succès !</p>
-        <h2 class="text-2xl font-black text-white">Choisissez votre formule</h2>
-        <p class="text-rose-100 text-sm mt-1">Sélectionnez le nombre de photos IA que vous souhaitez générer</p>
+        <h2 class="text-2xl font-black text-white">Abonnez-vous pour générer vos photos</h2>
+        <p class="text-rose-100 text-sm mt-1">Votre modèle IA est prêt — débloquez vos photos avec un abonnement</p>
         <div class="mt-4 flex items-center justify-center gap-2">
           <span class="text-rose-100 text-sm font-medium">Générer les photos en :</span>
           <div class="flex bg-white/20 rounded-full p-1 gap-1">
@@ -40,54 +40,37 @@
           </div>
         </div>
       </div>
-      <div class="p-8 grid md:grid-cols-3 gap-4">
-        <div class="relative border-2 border-gray-100 rounded-2xl p-6 hover:border-rose-200 hover:shadow-lg transition-all cursor-pointer group" id="plan-starter">
+
+      <!-- Single subscription plan -->
+      <div class="p-8">
+        <div class="relative border-2 border-rose-500 rounded-2xl p-6 shadow-xl shadow-rose-100 bg-rose-50/30 max-w-md mx-auto">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full">🔥 Le plus populaire</span>
+          </div>
           <div class="text-center mb-5">
-            <div class="text-3xl mb-2">🌱</div>
-            <h3 class="text-lg font-bold text-gray-900">Starter</h3>
-            <div class="mt-2"><span class="text-3xl font-black text-gray-900">$9.99</span></div>
-            <p class="text-sm text-gray-500 mt-1">20 photos IA</p>
+            <div class="text-3xl mb-2">✨</div>
+            <h3 class="text-lg font-bold text-gray-900">HaloProfile Premium</h3>
+            <div class="mt-2">
+              <span class="text-3xl font-black text-gray-900" data-price="$49.99">$49.99</span>
+              <span class="text-gray-500 text-sm">/mois</span>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">500 crédits par mois</p>
           </div>
           <ul class="space-y-2 text-sm text-gray-600 mb-6">
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 20 portraits stylisés</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 5 styles inclus</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Téléchargement HD</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 500 crédits/mois (~20 photos)</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Votre IA personnelle entraînée sur votre visage</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Tous les styles de photographie inclus</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Prompts personnalisés</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Téléchargement HD, annulez à tout moment</li>
           </ul>
-          <button onclick="selectPlan('starter')" class="w-full py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-rose-400 hover:text-rose-600 group-hover:border-rose-400 group-hover:text-rose-600 transition-all text-sm">Choisir</button>
+          <button onclick="selectPlan('premium')"
+            class="w-full py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all text-sm shadow-md shadow-rose-200">
+            ✨ S'abonner — $49.99/mois
+          </button>
         </div>
-        <div class="relative border-2 border-rose-500 rounded-2xl p-6 shadow-xl shadow-rose-100 bg-rose-50/30" id="plan-pro">
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2"><span class="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full">⭐ Le plus populaire</span></div>
-          <div class="text-center mb-5">
-            <div class="text-3xl mb-2">🔥</div>
-            <h3 class="text-lg font-bold text-gray-900">Pro</h3>
-            <div class="mt-2"><span class="text-3xl font-black text-gray-900">$19.99</span></div>
-            <p class="text-sm text-gray-500 mt-1">50 photos IA</p>
-          </div>
-          <ul class="space-y-2 text-sm text-gray-600 mb-6">
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 50 portraits stylisés</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 12 styles inclus</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Téléchargement HD</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Traitement prioritaire</li>
-          </ul>
-          <button onclick="selectPlan('pro')" class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all text-sm shadow-md shadow-rose-200">Choisir</button>
-        </div>
-        <div class="relative border-2 border-gray-100 rounded-2xl p-6 hover:border-rose-200 hover:shadow-lg transition-all cursor-pointer group" id="plan-premium">
-          <div class="text-center mb-5">
-            <div class="text-3xl mb-2">💎</div>
-            <h3 class="text-lg font-bold text-gray-900">Premium</h3>
-            <div class="mt-2"><span class="text-3xl font-black text-gray-900">$34.99</span></div>
-            <p class="text-sm text-gray-500 mt-1">100 photos IA</p>
-          </div>
-          <ul class="space-y-2 text-sm text-gray-600 mb-6">
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 100 portraits stylisés</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Tous les styles inclus</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Téléchargement HD</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Traitement prioritaire</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Licence commerciale</li>
-          </ul>
-          <button onclick="selectPlan('premium')" class="w-full py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-rose-400 hover:text-rose-600 group-hover:border-rose-400 group-hover:text-rose-600 transition-all text-sm">Choisir</button>
-        </div>
+        <p class="text-center text-xs text-gray-400 mt-4">Pas de frais cachés · Annulez à tout moment · Paiement sécurisé via Stripe</p>
       </div>
+
       <div id="plan-loading" class="hidden px-8 pb-6 text-center"><p class="text-sm text-gray-500 animate-pulse">Redirection vers le paiement sécurisé…</p></div>
       <div id="modal-error" class="hidden mx-8 mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg text-center"></div>
     </div>
@@ -180,6 +163,7 @@
 
   <script type="module">
     import { requireLogin, logout, getToken, supabase, getProfile, updateProfile } from "/js/auth.js";
+    import { getUserCurrency, formatPrice } from "/js/currency.js";
 
     const MIN = 15;
     const MAX = 30;
@@ -323,6 +307,17 @@
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
     let selectedGender = "male";
+
+    // ─── Dynamic pricing ──────────────────────────────────────────
+    const currency = getUserCurrency();
+
+    function updatePricing() {
+      const priceEls = document.querySelectorAll('[data-price]');
+      priceEls.forEach(el => {
+        el.textContent = formatPrice(49.99, currency);
+      });
+    }
+    updatePricing();
     window.setGender = (gender) => {
       selectedGender = gender;
       const maleBtn = document.getElementById("gender-male");
@@ -346,7 +341,7 @@
         const uploadId = localStorage.getItem("haloprofile_uploadId") || currentUploadId;
         const res = await fetch("/api/stripe/create-checkout", {
           method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ plan, uploadId, gender: selectedGender }),
+          body: JSON.stringify({ plan, uploadId, gender: selectedGender, currency, locale: 'fr' }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Checkout failed");

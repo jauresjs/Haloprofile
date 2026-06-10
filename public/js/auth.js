@@ -55,10 +55,14 @@ export async function signup(email, password) {
  * Log in with Google OAuth (redirects browser).
  */
 export async function loginWithGoogle() {
+  // Respect locale: if user is on a /fr/ page, redirect back to French upload
+  const isFrench = window.location.pathname.startsWith("/fr/");
+  const redirectPath = isFrench ? "/fr/upload.html" : "/upload.html";
+
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/upload.html`,
+      redirectTo: `${window.location.origin}${redirectPath}`,
     },
   });
   if (error) throw error;

@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { supabase } from "./lib/supabase.js";
 import { requireAuth } from "./middleware/auth.js";
 import uploadRouter from "./routes/upload.js";
@@ -8,8 +9,45 @@ import uploadRouter from "./routes/upload.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// ─── Rate Limiting ──────────────────────────────────────────────
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,       // 1 minute window
+  max: 60,                    // 60 requests per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutes
+  max: 10,                    // 10 attempts per 15 min
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts, please try again later." },
+});
+
+// Apply rate limiters
+app.use("/api/", apiLimiter);
+app.use("/api/stripe/create-checkout", authLimiter);
+app.use("/api/stripe/checkout-with-discount", authLimiter);
+app.use("/api/photos/generate", authLimiter);
+
+// ─── CORS — restrict to production domain ──────────────────────
+const ALLOWED_ORIGINS = [
+  "https://haloprofile.art",
+  "https://www.haloprofile.art",
+  "http://localhost:3000",
+];
+
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (server-to-server, curl, etc.)
+    if (!origin) return cb(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 app.use((req, res, next) => {
   if (req.originalUrl === "/api/stripe/webhook") {
     next();

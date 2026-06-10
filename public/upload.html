@@ -49,8 +49,8 @@
       <!-- Modal header -->
       <div class="bg-gradient-to-r from-rose-500 to-orange-500 px-8 py-6 text-center">
         <p class="text-rose-100 text-sm font-medium mb-1">🎉 Photos uploaded successfully!</p>
-        <h2 class="text-2xl font-black text-white">Choose Your Package</h2>
-        <p class="text-rose-100 text-sm mt-1">Select how many AI photos you'd like generated</p>
+        <h2 class="text-2xl font-black text-white">Subscribe to Generate Your Photos</h2>
+        <p class="text-rose-100 text-sm mt-1">Your AI model is ready — unlock your photos with a subscription</p>
 
         <!-- Gender selector -->
         <div class="mt-4 flex items-center justify-center gap-2">
@@ -68,78 +68,34 @@
         </div>
       </div>
 
-      <!-- Plans grid -->
-      <div class="p-8 grid md:grid-cols-3 gap-4">
-
-        <!-- Starter -->
-        <div class="relative border-2 border-gray-100 rounded-2xl p-6 hover:border-rose-200 hover:shadow-lg transition-all cursor-pointer group" id="plan-starter">
-          <div class="text-center mb-5">
-            <div class="text-3xl mb-2">🌱</div>
-            <h3 class="text-lg font-bold text-gray-900">Starter</h3>
-            <div class="mt-2">
-              <span class="text-3xl font-black text-gray-900">$9.99</span>
-            </div>
-            <p class="text-sm text-gray-500 mt-1">20 AI photos</p>
-          </div>
-          <ul class="space-y-2 text-sm text-gray-600 mb-6">
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 20 styled headshots</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 5 styles included</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD download</li>
-          </ul>
-          <button onclick="selectPlan('starter')"
-            class="w-full py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-rose-400 hover:text-rose-600 group-hover:border-rose-400 group-hover:text-rose-600 transition-all text-sm">
-            Select Plan
-          </button>
-        </div>
-
-        <!-- Pro (Most Popular) -->
-        <div class="relative border-2 border-rose-500 rounded-2xl p-6 shadow-xl shadow-rose-100 bg-rose-50/30" id="plan-pro">
+      <!-- Single subscription plan -->
+      <div class="p-8">
+        <div class="relative border-2 border-rose-500 rounded-2xl p-6 shadow-xl shadow-rose-100 bg-rose-50/30 max-w-md mx-auto">
           <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full">⭐ Most Popular</span>
+            <span class="bg-gradient-to-r from-rose-500 to-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full">🔥 Most Popular</span>
           </div>
           <div class="text-center mb-5">
-            <div class="text-3xl mb-2">🔥</div>
-            <h3 class="text-lg font-bold text-gray-900">Pro</h3>
+            <div class="text-3xl mb-2">✨</div>
+            <h3 class="text-lg font-bold text-gray-900">HaloProfile Premium</h3>
             <div class="mt-2">
-              <span class="text-3xl font-black text-gray-900">$19.99</span>
+              <span class="text-3xl font-black text-gray-900" data-price="$49.99">$49.99</span>
+              <span class="text-gray-500 text-sm">/month</span>
             </div>
-            <p class="text-sm text-gray-500 mt-1">50 AI photos</p>
+            <p class="text-sm text-gray-500 mt-1">500 credits per month</p>
           </div>
           <ul class="space-y-2 text-sm text-gray-600 mb-6">
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 50 styled headshots</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 12 styles included</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD download</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Priority processing</li>
-          </ul>
-          <button onclick="selectPlan('pro')"
-            class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all text-sm shadow-md shadow-rose-200">
-            Select Plan
-          </button>
-        </div>
-
-        <!-- Premium -->
-        <div class="relative border-2 border-gray-100 rounded-2xl p-6 hover:border-rose-200 hover:shadow-lg transition-all cursor-pointer group" id="plan-premium">
-          <div class="text-center mb-5">
-            <div class="text-3xl mb-2">💎</div>
-            <h3 class="text-lg font-bold text-gray-900">Premium</h3>
-            <div class="mt-2">
-              <span class="text-3xl font-black text-gray-900">$34.99</span>
-            </div>
-            <p class="text-sm text-gray-500 mt-1">100 AI photos</p>
-          </div>
-          <ul class="space-y-2 text-sm text-gray-600 mb-6">
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 100 styled headshots</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> All styles included</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD download</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Priority processing</li>
-            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Commercial license</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> 500 credits/month (~20 photos)</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Your personal AI trained on your face</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> All photography styles included</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> Custom prompt support</li>
+            <li class="flex items-center gap-2"><span class="text-green-500">✓</span> HD downloads, cancel anytime</li>
           </ul>
           <button onclick="selectPlan('premium')"
-            class="w-full py-2.5 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-rose-400 hover:text-rose-600 group-hover:border-rose-400 group-hover:text-rose-600 transition-all text-sm">
-            Select Plan
+            class="w-full py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl hover:from-rose-600 hover:to-orange-600 transition-all text-sm shadow-md shadow-rose-200">
+            ✨ Subscribe — <span data-price="$49.99">$49.99</span>/mo
           </button>
         </div>
-
+        <p class="text-center text-xs text-gray-400 mt-4">No hidden fees · Cancel anytime · Secure checkout via Stripe</p>
       </div>
 
       <!-- Plan loading state -->
@@ -256,7 +212,7 @@
             class="w-full py-4 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold text-base rounded-2xl
                    shadow-xl shadow-rose-200 transition-all active:scale-95
                    disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100">
-            Upload &amp; Continue →
+            Upload & Continue →
           </button>
 
         </div>
@@ -306,6 +262,7 @@
 
   <script type="module">
     import { requireLogin, logout, getToken, supabase, getProfile, updateProfile } from "/js/auth.js";
+    import { getUserCurrency, formatPrice } from "/js/currency.js";
 
     const MIN = 15;
     const MAX = 30;
@@ -562,6 +519,18 @@
       }
     };
 
+    // ─── Dynamic pricing ──────────────────────────────────────────
+    const currency = getUserCurrency();
+
+    function updatePricing() {
+      const priceEls = document.querySelectorAll('[data-price]');
+      const fullPrice = 49.99;
+      priceEls.forEach(el => {
+        el.textContent = formatPrice(fullPrice, currency);
+      });
+    }
+    updatePricing();
+
     // ─── Plan selection ────────────────────────────────────────
     window.selectPlan = async (plan) => {
       const loadingEl = document.getElementById("plan-loading");
@@ -582,7 +551,7 @@
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ plan, uploadId, gender: selectedGender }),
+          body: JSON.stringify({ plan, uploadId, gender: selectedGender, currency }),
         });
 
         const data = await res.json();
