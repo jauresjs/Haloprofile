@@ -11,7 +11,7 @@ import stripeRouter from "./routes/stripe.js";
 import uploadRouter from "./routes/upload.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // ─── Rate Limiting ──────────────────────────────────────────────
 const apiLimiter = rateLimit({
