@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
+import { stripe } from "../lib/stripe.js";
 import { sendWelcomeEmail } from "../lib/email.js";
 
 const router = Router();
@@ -71,6 +72,93 @@ router.post("/auto-confirm", async (req, res) => {
   } catch (error) {
     console.error("[Auth] Auto-confirm error:", error.message);
     return res.status(500).json({ error: "Failed to confirm user" });
+  }
+});
+
+/**
+ * POST /api/auth/unsubscribe
+ * Cancels the user's active Stripe subscription.
+ */
+router.post("/unsubscribe", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Fetch profile to get stripe_subscription_id
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("stripe_subscription_id, subscription_status")
+      .eq("id", userId)
+      .single();
+
+    if (profileError) {
+      console.error("[Auth] Unsubscribe profile error:", profileError.message);
+      return res.status(500).json({ error: "Failed to fetch profile" });
+    }
+
+    if (!profile?.stripe_subscription_id || profile.subscription_status !== "active") {
+      return res.status(400).json({ error: "No active subscription found" });
+    }
+
+    // Cancel the Stripe subscription at period end
+    await stripe.subscriptions.update(profile.stripe_subscription_id, {
+      cancel_at_period_end: true,
+    });
+
+    // Update profile status
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        subscription_status: "cancelled",
+        subscription_credits: 0,
+      })
+      .eq("id", userId);
+
+    console.log(`[Auth] Subscription cancelled for user ${userId}`);
+    return res.json({ success: true, message: "Subscription cancelled. You'll retain access until the end of the billing period." });
+  } catch (error) {
+    console.error("[Auth] Unsubscribe error:", error.message);
+    return res.status(500).json({ error: "Failed to cancel subscription" });
+  }
+});
+
+/**
+ * POST /api/auth/delete-account
+ * Cancels subscription (if any) and permanently deletes the user account.
+ */
+router.post("/delete-account", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Attempt to cancel subscription if active
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("stripe_subscription_id, subscription_status")
+        .eq("id", userId)
+        .single();
+
+      if (profile?.stripe_subscription_id && profile.subscription_status === "active") {
+        await stripe.subscriptions.cancel(profile.stripe_subscription_id);
+        console.log(`[Auth] Stripe subscription cancelled for user ${userId} during account deletion`);
+      }
+    } catch (subErr) {
+      // Don't block deletion if Stripe cancel fails
+      console.warn(`[Auth] Failed to cancel Stripe sub for ${userId}:`, subErr.message);
+    }
+
+    // Delete the user from Supabase Auth — all related data cascades
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+    if (deleteError) {
+      console.error("[Auth] Delete account error:", deleteError.message);
+      return res.status(500).json({ error: "Failed to delete account" });
+    }
+
+    console.log(`[Auth] Account deleted for user ${userId}`);
+    return res.json({ success: true, message: "Account permanently deleted." });
+  } catch (error) {
+    console.error("[Auth] Delete account error:", error.message);
+    return res.status(500).json({ error: "Failed to delete account" });
   }
 });
 

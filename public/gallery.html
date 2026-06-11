@@ -302,6 +302,39 @@
               Save Changes
             </button>
           </div>
+
+          <!-- Danger Zone -->
+          <div class="border-t border-gray-100 pt-5 mt-5 space-y-3">
+            <div id="unsubscribe-section" class="hidden">
+              <button id="btn-unsubscribe" onclick="handleUnsubscribe()"
+                class="w-full py-3 rounded-xl text-sm font-bold border-2 border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition-all">
+                Unsubscribe
+              </button>
+              <div id="unsubscribe-confirm" class="hidden mt-2">
+                <p class="text-xs text-amber-600 text-center mb-2">Cancel your subscription? You'll keep access until the end of the billing period.</p>
+                <button id="btn-unsubscribe-confirm" onclick="confirmUnsubscribe()"
+                  class="w-full py-3 rounded-xl text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 transition-all">
+                  Yes, Cancel Subscription
+                </button>
+              </div>
+              <div id="unsubscribe-success" class="hidden mt-2 text-xs text-emerald-600 text-center font-medium"></div>
+            </div>
+
+            <div>
+              <button id="btn-delete-account" onclick="handleDeleteAccount()"
+                class="w-full py-3 rounded-xl text-sm font-bold border-2 border-red-300 text-red-700 bg-red-50 hover:bg-red-100 transition-all">
+                Delete Account
+              </button>
+              <div id="delete-confirm" class="hidden mt-2">
+                <p class="text-xs text-red-600 text-center mb-2">This will permanently delete your account and all photos. This cannot be undone.</p>
+                <button id="btn-delete-confirm" onclick="confirmDeleteAccount()"
+                  class="w-full py-3 rounded-xl text-sm font-bold bg-red-600 text-white hover:bg-red-700 transition-all">
+                  Yes, Delete My Account
+                </button>
+              </div>
+              <div id="delete-error" class="hidden mt-2 text-xs text-red-600 text-center font-medium"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -384,6 +417,7 @@
       const profile = await getProfile();
       userGender   = profile?.gender    || "male";
       userShotType = profile?.shot_type || "bust";
+      window.userSubscriptionStatus = profile?.subscription_status || null;
       applySettingsGenderUI(userGender);
       applySettingsShotUI(userShotType);
       applyGenerateShotUI(userShotType); // prime Generate New modal too
@@ -438,6 +472,22 @@
       document.getElementById('btn-settings').addEventListener('click', () => {
         applySettingsGenderUI(userGender);   // sync UI to current values
         applySettingsShotUI(userShotType);
+        // Show unsubscribe section only if user has active subscription
+        const subStatus = window.userSubscriptionStatus;
+        const unsubSection = document.getElementById('unsubscribe-section');
+        if (subStatus === 'active') {
+          unsubSection.classList.remove('hidden');
+        } else {
+          unsubSection.classList.add('hidden');
+        }
+        // Reset unsubscribe & delete states
+        document.getElementById('unsubscribe-confirm').classList.add('hidden');
+        document.getElementById('unsubscribe-success').classList.add('hidden');
+        document.getElementById('btn-unsubscribe').disabled = false;
+        document.getElementById('btn-unsubscribe').textContent = 'Unsubscribe';
+        document.getElementById('delete-confirm').classList.add('hidden');
+        document.getElementById('delete-error').classList.add('hidden');
+        document.getElementById('btn-delete-account').disabled = false;
         document.getElementById('settings-modal').classList.remove('hidden');
       });
 
@@ -823,6 +873,63 @@
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.classList.remove("hidden");
+      }
+    };
+
+    // ─── Unsubscribe ──────────────────────────────────────────
+    window.handleUnsubscribe = () => {
+      document.getElementById('unsubscribe-confirm').classList.remove('hidden');
+      document.getElementById('btn-unsubscribe').disabled = true;
+    };
+
+    window.confirmUnsubscribe = async () => {
+      const btn = document.getElementById('btn-unsubscribe-confirm');
+      btn.disabled = true;
+      btn.textContent = 'Cancelling...';
+      try {
+        const res = await authFetch('/api/auth/unsubscribe', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('unsubscribe-confirm').classList.add('hidden');
+        const successEl = document.getElementById('unsubscribe-success');
+        successEl.textContent = '✅ Subscription cancelled. You keep access until the end of the billing period.';
+        successEl.classList.remove('hidden');
+        document.getElementById('btn-unsubscribe').textContent = 'Cancelled';
+      } catch (err) {
+        alert(err.message || 'Failed to unsubscribe');
+        document.getElementById('btn-unsubscribe').disabled = false;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Yes, Cancel Subscription';
+      }
+    };
+
+    // ─── Delete Account ──────────────────────────────────────
+    window.handleDeleteAccount = () => {
+      document.getElementById('delete-confirm').classList.remove('hidden');
+      document.getElementById('btn-delete-account').disabled = true;
+    };
+
+    window.confirmDeleteAccount = async () => {
+      const btn = document.getElementById('btn-delete-confirm');
+      const errorEl = document.getElementById('delete-error');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+      errorEl.classList.add('hidden');
+      try {
+        const res = await authFetch('/api/auth/delete-account', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        // Sign out and redirect
+        const { logout } = await import('/js/auth.js');
+        await logout();
+        window.location.href = '/auth.html';
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Yes, Delete My Account';
+        document.getElementById('btn-delete-account').disabled = false;
+        errorEl.textContent = err.message || 'Failed to delete account';
+        errorEl.classList.remove('hidden');
       }
     };
 

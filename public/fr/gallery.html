@@ -202,8 +202,41 @@
           <div id="settings-status" class="hidden text-sm text-center font-medium py-2 rounded-lg"></div>
 
           <div class="flex gap-3">
-          <button onclick="closeSettings()" class="flex-1 py-3 border-2 border-gray-200 text-gray-600 font-semibold rounded-xl hover:border-gray-300 transition-all text-sm">Annuler</button>
+            <button onclick="closeSettings()" class="flex-1 py-3 border-2 border-gray-200 text-gray-600 font-semibold rounded-xl hover:border-gray-300 transition-all text-sm">Annuler</button>
             <button id="btn-save-settings" onclick="saveSettings()" class="flex-1 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white font-bold rounded-xl shadow-md transition-all text-sm hover:from-rose-600 hover:to-orange-600 active:scale-95">Sauvegarder</button>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="border-t border-gray-100 pt-5 mt-5 space-y-3">
+            <div id="unsubscribe-section" class="hidden">
+              <button id="btn-unsubscribe" onclick="handleUnsubscribe()"
+                class="w-full py-3 rounded-xl text-sm font-bold border-2 border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100 transition-all">
+                Se Désabonner
+              </button>
+              <div id="unsubscribe-confirm" class="hidden mt-2">
+                <p class="text-xs text-amber-600 text-center mb-2">Annuler votre abonnement ? Vous conservez l'accès jusqu'à la fin de la période de facturation.</p>
+                <button id="btn-unsubscribe-confirm" onclick="confirmUnsubscribe()"
+                  class="w-full py-3 rounded-xl text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 transition-all">
+                  Oui, Annuler l'Abonnement
+                </button>
+              </div>
+              <div id="unsubscribe-success" class="hidden mt-2 text-xs text-emerald-600 text-center font-medium"></div>
+            </div>
+
+            <div>
+              <button id="btn-delete-account" onclick="handleDeleteAccount()"
+                class="w-full py-3 rounded-xl text-sm font-bold border-2 border-red-300 text-red-700 bg-red-50 hover:bg-red-100 transition-all">
+                Supprimer le Compte
+              </button>
+              <div id="delete-confirm" class="hidden mt-2">
+                <p class="text-xs text-red-600 text-center mb-2">Cela supprimera définitivement votre compte et toutes vos photos. Cette action est irréversible.</p>
+                <button id="btn-delete-confirm" onclick="confirmDeleteAccount()"
+                  class="w-full py-3 rounded-xl text-sm font-bold bg-red-600 text-white hover:bg-red-700 transition-all">
+                  Oui, Supprimer Mon Compte
+                </button>
+              </div>
+              <div id="delete-error" class="hidden mt-2 text-xs text-red-600 text-center font-medium"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -284,6 +317,7 @@
       const profile = await getProfile();
       userGender   = profile?.gender    || "male";
       userShotType = profile?.shot_type || "bust";
+      window.userSubscriptionStatus = profile?.subscription_status || null;
       applySettingsGenderUI(userGender);
       applySettingsShotUI(userShotType);
       applyGenerateShotUI(userShotType);
@@ -337,6 +371,22 @@
       document.getElementById('btn-settings').addEventListener('click', () => {
         applySettingsGenderUI(userGender);
         applySettingsShotUI(userShotType);
+        // Show unsubscribe section only if user has active subscription
+        const subStatus = window.userSubscriptionStatus;
+        const unsubSection = document.getElementById('unsubscribe-section');
+        if (subStatus === 'active') {
+          unsubSection.classList.remove('hidden');
+        } else {
+          unsubSection.classList.add('hidden');
+        }
+        // Reset unsubscribe & delete states
+        document.getElementById('unsubscribe-confirm').classList.add('hidden');
+        document.getElementById('unsubscribe-success').classList.add('hidden');
+        document.getElementById('btn-unsubscribe').disabled = false;
+        document.getElementById('btn-unsubscribe').textContent = 'Se Désabonner';
+        document.getElementById('delete-confirm').classList.add('hidden');
+        document.getElementById('delete-error').classList.add('hidden');
+        document.getElementById('btn-delete-account').disabled = false;
         document.getElementById('settings-modal').classList.remove('hidden');
       });
 
@@ -640,6 +690,63 @@
       } catch (err) {
         errorEl.textContent = err.message;
         errorEl.classList.remove("hidden");
+      }
+    };
+
+    // ─── Se Désabonner ───────────────────────────────────────
+    window.handleUnsubscribe = () => {
+      document.getElementById('unsubscribe-confirm').classList.remove('hidden');
+      document.getElementById('btn-unsubscribe').disabled = true;
+    };
+
+    window.confirmUnsubscribe = async () => {
+      const btn = document.getElementById('btn-unsubscribe-confirm');
+      btn.disabled = true;
+      btn.textContent = 'Annulation...';
+      try {
+        const res = await authFetch('/api/auth/unsubscribe', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('unsubscribe-confirm').classList.add('hidden');
+        const successEl = document.getElementById('unsubscribe-success');
+        successEl.textContent = '✅ Abonnement annulé. Vous conservez l\'accès jusqu\'à la fin de la période de facturation.';
+        successEl.classList.remove('hidden');
+        document.getElementById('btn-unsubscribe').textContent = 'Annulé';
+      } catch (err) {
+        alert(err.message || 'Échec du désabonnement');
+        document.getElementById('btn-unsubscribe').disabled = false;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Oui, Annuler l\'Abonnement';
+      }
+    };
+
+    // ─── Supprimer le Compte ──────────────────────────────────
+    window.handleDeleteAccount = () => {
+      document.getElementById('delete-confirm').classList.remove('hidden');
+      document.getElementById('btn-delete-account').disabled = true;
+    };
+
+    window.confirmDeleteAccount = async () => {
+      const btn = document.getElementById('btn-delete-confirm');
+      const errorEl = document.getElementById('delete-error');
+      btn.disabled = true;
+      btn.textContent = 'Suppression...';
+      errorEl.classList.add('hidden');
+      try {
+        const res = await authFetch('/api/auth/delete-account', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        // Sign out and redirect
+        const { logout } = await import('/js/auth.js');
+        await logout();
+        window.location.href = '/auth.html';
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = 'Oui, Supprimer Mon Compte';
+        document.getElementById('btn-delete-account').disabled = false;
+        errorEl.textContent = err.message || 'Échec de la suppression du compte';
+        errorEl.classList.remove('hidden');
       }
     };
 
