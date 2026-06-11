@@ -65,8 +65,15 @@ app.use((req, res, next) => {
   }
 });
 
-// Serve static files from public/
-app.use(express.static("public"));
+// Serve static files from public/ with cache busting
+app.use(express.static("public", {
+  maxAge: 0,
+  setHeaders(res, path) {
+    if (path.endsWith(".html") || path.endsWith(".js")) {
+      res.setHeader("Cache-Control", "no-store, must-revalidate");
+    }
+  }
+}));
 
 // Health check
 app.get("/health", async (_req, res) => {

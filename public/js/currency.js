@@ -30,9 +30,11 @@ export function getUserCurrency() {
     ))) return 'cad';
   } catch (e) { /* fall through */ }
 
+  // 4. EU countries
   const euLangs = ['de', 'fr', 'es', 'it', 'nl', 'pt', 'pl', 'sv', 'da', 'fi', 'nb', 'nn'];
   const prefix = lang.split('-')[0];
   if (euLangs.includes(prefix)) return 'eur';
+
   return 'usd';
 }
 
