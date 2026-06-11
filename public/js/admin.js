@@ -3,7 +3,7 @@
  * Handles authentication and API calls for the admin panel.
  */
 
-const ADMIN_API = "/api/admin";
+export const ADMIN_API = "/api/admin";
 const TOKEN_KEY = "haloprofile_admin_token";
 
 /**

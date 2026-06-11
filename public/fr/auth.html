@@ -10,9 +10,10 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 flex items-center justify-center p-4">
+<body class="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 flex flex-col">
 
-  <div class="w-full max-w-md">
+  <div class="flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
     <!-- Logo -->
     <div class="text-center mb-8 relative">
       <a href="/fr/" class="inline-flex items-center gap-2">
@@ -20,7 +21,6 @@
         <span class="text-2xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
       </a>
       <p class="text-gray-500 text-sm mt-2">Vos photos de profil par IA</p>
-      <a id="lang-toggle" class="absolute top-0 right-0 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">🇬🇧 EN</a>
     </div>
 
     <!-- Card -->
@@ -95,12 +95,10 @@
       En continuant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
     </p>
   </div>
+</div>
 
-  <script type="module">
+<script type="module">
     import { login, signup, loginWithGoogle, getToken } from "/js/auth.js";
-    document.getElementById('lang-toggle').addEventListener('click', () => {
-      window.location.href = '/auth.html';
-    });
 
     let currentTab = "login";
 
@@ -150,6 +148,18 @@
           window.location.href = "/fr/upload.html";
         } else {
           const data = await signup(email, password);
+          // Auto-confirm the user so they can continue without email verification
+          try {
+            if (data?.user?.id) {
+              await fetch("/api/auth/auto-confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: data.user.id }),
+              });
+            }
+          } catch (e) { /* non-blocking */ }
+          // Log in immediately
+          await login(email, password);
           // Send welcome email (non-blocking) — French locale
           try {
             const token = await getToken();
@@ -161,12 +171,7 @@
               }).catch(() => {});
             }
           } catch (e) { /* non-blocking */ }
-          if (data.session) {
-            window.location.href = "/fr/upload.html";
-          } else {
-            showSuccess("Un email de confirmation vous a été envoyé. Vérifiez votre boîte de réception, puis connectez-vous.");
-            switchTab("login");
-          }
+          window.location.href = "/fr/upload.html";
         }
       } catch (err) {
         showError(err.message || "Une erreur est survenue. Veuillez réessayer.");
@@ -204,6 +209,19 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter") handleSubmit();
+    });
+  </script>
+  <!-- Footer -->
+  <footer class="w-full text-center py-8 border-t border-gray-200 mt-10">
+    <div class="flex items-center justify-center gap-6 text-sm">
+      <a href="/fr/blog.html" class="text-gray-400 hover:text-gray-600 transition-colors">Blog</a>
+      <a id="lang-toggle" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">🇬🇧 EN</a>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      window.location.href = '/auth.html';
     });
   </script>
 </body>

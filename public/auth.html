@@ -11,9 +11,10 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 flex items-center justify-center p-4">
+<body class="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50 flex flex-col">
 
-  <div class="w-full max-w-md">
+  <div class="flex-1 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
     <!-- Logo -->
     <div class="text-center mb-8 relative">
       <a href="/" class="inline-flex items-center gap-2">
@@ -21,7 +22,6 @@
         <span class="text-2xl font-bold bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-transparent">HaloProfile</span>
       </a>
       <p class="text-gray-500 text-sm mt-2">Your AI-powered dating photos</p>
-      <a id="lang-toggle" class="absolute top-0 right-0 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">🇫🇷 FR</a>
     </div>
 
     <!-- Card -->
@@ -96,12 +96,10 @@
       By continuing, you agree to our Terms of Service & Privacy Policy.
     </p>
   </div>
+</div>
 
-  <script type="module">
+<script type="module">
     import { login, signup, loginWithGoogle, getToken } from "/js/auth.js";
-    document.getElementById('lang-toggle').addEventListener('click', () => {
-      window.location.href = '/fr/auth.html';
-    });
 
     let currentTab = "login";
 
@@ -154,6 +152,19 @@
           // Send welcome email (non-blocking)
           const isFrench = window.location.pathname.startsWith("/fr/");
           const locale = isFrench ? "fr" : "en";
+          // Auto-confirm the user so they can continue without email verification
+          try {
+            if (data?.user?.id) {
+              await fetch("/api/auth/auto-confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userId: data.user.id }),
+              });
+            }
+          } catch (e) { /* non-blocking */ }
+          // Log in immediately
+          await login(email, password);
+          // Send welcome email (non-blocking)
           try {
             const token = await getToken();
             if (token) {
@@ -164,12 +175,7 @@
               }).catch(() => {});
             }
           } catch (e) { /* non-blocking */ }
-          if (data.session) {
-            window.location.href = isFrench ? "/fr/upload.html" : "/upload.html";
-          } else {
-            showSuccess("Check your email to confirm your account, then log in.");
-            switchTab("login");
-          }
+          window.location.href = isFrench ? "/fr/upload.html" : "/upload.html";
         }
       } catch (err) {
         showError(err.message || "Something went wrong. Please try again.");
@@ -208,6 +214,19 @@
     // Allow Enter key to submit
     document.addEventListener("keydown", (e) => {
       if (e.key === "Enter") handleSubmit();
+    });
+  </script>
+  <!-- Footer -->
+  <footer class="w-full text-center py-8 border-t border-gray-200 mt-10">
+    <div class="flex items-center justify-center gap-6 text-sm">
+      <a href="/blog.html" class="text-gray-400 hover:text-gray-600 transition-colors">Blog</a>
+      <a id="lang-toggle" class="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">🇫🇷 FR</a>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      window.location.href = '/fr/auth.html';
     });
   </script>
 </body>

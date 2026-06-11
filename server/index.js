@@ -14,6 +14,9 @@ import adminRouter from "./routes/admin.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Trust Caddy reverse proxy so rate-limiter sees real client IPs
+app.set("trust proxy", 1);
+
 // ─── Rate Limiting ──────────────────────────────────────────────
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,       // 1 minute window
@@ -42,6 +45,7 @@ const ALLOWED_ORIGINS = [
   "https://haloprofile.art",
   "https://www.haloprofile.art",
   "http://localhost:3000",
+  "http://localhost:4000",
 ];
 
 app.use(cors({

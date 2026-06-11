@@ -17,3 +17,4 @@ scratch/
 .vscode/
 supabase/.temp/
 write-status.js.bak
+logs/

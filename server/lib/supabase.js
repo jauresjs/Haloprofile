@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import ws from "ws";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
@@ -9,11 +10,14 @@ if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
   process.exit(1);
 }
 
+const wsTransport = { transport: ws };
+
 // Public client — used for auth.getUser() token validation (respects RLS)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, wsTransport);
 
 // Admin client — service_role key, bypasses RLS for server-side operations only
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  ...wsTransport,
   auth: {
     autoRefreshToken: false,
     persistSession: false,

@@ -43,4 +43,35 @@ router.post("/welcome", requireAuth, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/auth/auto-confirm
+ * Auto-confirms a user's email after signup so they can continue without
+ * waiting for the verification email.
+ * Body: { userId: string }
+ */
+router.post("/auto-confirm", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+      userId,
+      { email_confirm: true }
+    );
+
+    if (error) {
+      console.error("[Auth] Auto-confirm error:", error.message);
+      return res.status(500).json({ error: "Failed to confirm user" });
+    }
+
+    console.log(`[Auth] Auto-confirmed user ${userId}`);
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("[Auth] Auto-confirm error:", error.message);
+    return res.status(500).json({ error: "Failed to confirm user" });
+  }
+});
+
 export default router;
