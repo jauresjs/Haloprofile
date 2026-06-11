@@ -249,7 +249,7 @@
         <div class="text-5xl font-black text-white mb-1"><span data-price="$49.99">$49.99</span><span class="text-xl text-white/40 font-normal">/mo</span></div>
         <div class="text-rose-400 font-semibold mb-6">Premium Plan</div>
         <ul class="text-left space-y-3 mb-8">
-          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> <strong class="text-white">500 credits per month</strong> (20 photos)</li>
+          <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> <strong class="text-white">500 credits per month</strong></li>
           <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> Your personal AI trained on your face</li>
           <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> All photography styles included</li>
           <li class="flex items-center gap-3 text-white/80"><span class="w-5 h-5 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs text-emerald-400 shrink-0">✓</span> Custom prompt support — generate what YOU want</li>
@@ -274,7 +274,7 @@
         <div class="px-8 pb-8 text-center">
           <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center text-3xl animate-pulse">🔥</div>
           <h2 class="text-2xl font-black text-white mb-2">Wait! Don't go yet.</h2>
-          <p class="text-white/60 mb-6">Here's a <strong class="text-rose-400">50% discount</strong> just for you — first month only.</p>
+          <p class="text-white/60 mb-6">Here's a <strong class="text-rose-400">50% discount</strong> just for you.</p>
 
           <!-- Price comparison -->
           <div class="flex items-center justify-center gap-4 mb-6">
@@ -481,7 +481,7 @@
         const res = await fetch("/api/stripe/create-checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ plan: "premium", uploadId, gender: selectedGender, currency }),
+          body: JSON.stringify({ plan: "premium", uploadId, gender: selectedGender }),
         });
 
         const data = await res.json();
