@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — HaloProfile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 2px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin 1s linear infinite; }
+    .modal-backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="sticky top-0 z-40 bg-gray-900/90 backdrop-blur-md border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">⚙️</span>
+        <span class="font-bold text-white">Admin</span>
+        <span class="text-gray-500 text-sm hidden sm:inline">— HaloProfile Dashboard</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="clock" class="text-xs text-gray-500 font-mono"></span>
+        <button onclick="logoutAdmin()" class="text-xs text-gray-400 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-800">
+          Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- ─── Stats Cards ────────────────────────────────────────── -->
+    <section id="stats-section">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="text-xs text-gray-400 font-medium mb-1">Total Users</div>
+          <div id="stat-total-users" class="text-2xl font-bold text-white">—</div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="text-xs text-gray-400 font-medium mb-1">Subscribed</div>
+          <div id="stat-subscribed" class="text-2xl font-bold text-emerald-400">—</div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="text-xs text-gray-400 font-medium mb-1">Pending Payment</div>
+          <div id="stat-pending" class="text-2xl font-bold text-amber-400">—</div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="text-xs text-gray-400 font-medium mb-1">Total Uploaders</div>
+          <div id="stat-uploaders" class="text-2xl font-bold text-sky-400">—</div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="text-xs text-gray-400 font-medium mb-1">Revenue</div>
+          <div id="stat-revenue" class="text-2xl font-bold text-green-400">—</div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <div class="text-xs text-gray-400 font-medium mb-1">Total Credits</div>
+          <div id="stat-credits" class="text-2xl font-bold text-violet-400">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Filters & Search ───────────────────────────────────── -->
+    <section class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+      <div class="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1">
+        <button data-filter="all" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg bg-rose-600 text-white transition-all">All Users</button>
+        <button data-filter="pending" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Pending</button>
+        <button data-filter="subscribed" class="filter-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Subscribed</button>
+      </div>
+      <div class="flex gap-2 w-full sm:w-auto">
+        <input id="search-input" type="text" placeholder="Search by email or name…"
+          class="w-full sm:w-64 px-4 py-2 bg-gray-900 border border-gray-800 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
+        <button onclick="loadUsers()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-sm transition-colors">
+          🔍
+        </button>
+      </div>
+    </section>
+
+    <!-- ─── Users Table ────────────────────────────────────────── -->
+    <section id="users-section">
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-800/50">
+              <tr>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Email</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Name</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Status</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Credits</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Uploads</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Photos</th>
+                <th class="text-left px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Joined</th>
+                <th class="text-right px-4 py-3 text-gray-400 font-medium text-xs uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr>
+                <td colspan="8" class="px-4 py-12 text-center text-gray-500">Loading users…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination -->
+        <div id="pagination" class="hidden border-t border-gray-800 px-4 py-3 flex items-center justify-between">
+          <span id="page-info" class="text-xs text-gray-500"></span>
+          <div class="flex gap-2">
+            <button id="prev-page" onclick="changePage(-1)" class="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50" disabled>← Prev</button>
+            <button id="next-page" onclick="changePage(1)" class="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50" disabled>Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══ User Detail Modal ═══════════════════════════════════ -->
+  <div id="user-modal" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeModal()"></div>
+    <div class="relative max-w-4xl mx-auto mt-8 mb-8 mx-4 max-h-[90vh] overflow-y-auto bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl scrollbar-thin">
+      
+      <!-- Modal Header -->
+      <div class="sticky top-0 z-10 bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+        <div>
+          <h2 id="modal-user-name" class="text-lg font-bold text-white">User Details</h2>
+          <p id="modal-user-email" class="text-sm text-gray-400"></p>
+        </div>
+        <button onclick="closeModal()" class="text-gray-500 hover:text-white transition-colors text-xl">&times;</button>
+      </div>
+
+      <div class="p-6 space-y-6">
+
+        <!-- ── Tabs ── -->
+        <div class="flex gap-1 bg-gray-800/50 rounded-xl p-1">
+          <button data-tab="profile" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg bg-rose-600 text-white transition-all">Profile</button>
+          <button data-tab="uploads" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Uploads</button>
+          <button data-tab="training" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Training</button>
+          <button data-tab="photos" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Photos</button>
+          <button data-tab="orders" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Orders</button>
+          <button data-tab="credits" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all">Add Credits</button>
+        </div>
+
+        <!-- ══ Tab: Profile ══ -->
+        <div id="tab-profile" class="tab-content space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">User ID</div>
+              <div id="detail-user-id" class="text-sm font-mono text-gray-300 break-all"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Gender</div>
+              <div id="detail-gender" class="text-sm text-gray-300 capitalize"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Plan</div>
+              <div id="detail-plan" class="text-sm text-gray-300"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Subscription Status</div>
+              <div id="detail-sub-status" class="text-sm"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Subscription Credits</div>
+              <div id="detail-sub-credits" class="text-sm text-gray-300"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Purchased Credits</div>
+              <div id="detail-pur-credits" class="text-sm text-gray-300"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Total Credits</div>
+              <div id="detail-total-credits" class="text-sm font-semibold text-white"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Generated Photos</div>
+              <div id="detail-photo-count" class="text-sm text-gray-300"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Created</div>
+              <div id="detail-created" class="text-sm text-gray-300"></div>
+            </div>
+            <div class="bg-gray-800/50 rounded-xl p-4">
+              <div class="text-xs text-gray-500 mb-1">Updated</div>
+              <div id="detail-updated" class="text-sm text-gray-300"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ Tab: Uploads ══ -->
+        <div id="tab-uploads" class="tab-content hidden space-y-3">
+          <div id="uploads-list" class="space-y-2">
+            <p class="text-gray-500 text-sm">No uploads found.</p>
+          </div>
+        </div>
+
+        <!-- ══ Tab: Training ══ -->
+        <div id="tab-training" class="tab-content hidden space-y-3">
+          <div id="training-list" class="space-y-2">
+            <p class="text-gray-500 text-sm">No training jobs found.</p>
+          </div>
+        </div>
+
+        <!-- ══ Tab: Photos ══ -->
+        <div id="tab-photos" class="tab-content hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <p id="photos-count" class="text-sm text-gray-400"></p>
+            <button onclick="loadUserPhotos(currentUserId)" class="text-xs text-rose-400 hover:text-rose-300 transition-colors">Refresh</button>
+          </div>
+          <div id="photos-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <p class="text-gray-500 text-sm col-span-full">No generated photos yet.</p>
+          </div>
+        </div>
+
+        <!-- ══ Tab: Orders ══ -->
+        <div id="tab-orders" class="tab-content hidden space-y-3">
+          <div id="orders-list" class="space-y-2">
+            <p class="text-gray-500 text-sm">No orders found.</p>
+          </div>
+        </div>
+
+        <!-- ══ Tab: Add Credits ══ -->
+        <div id="tab-credits" class="tab-content hidden space-y-4">
+          <div class="bg-gray-800/50 rounded-xl p-5 space-y-4">
+            <h3 class="text-sm font-semibold text-white">Add Credits to User</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Credit Type</label>
+                <select id="credit-type" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-rose-500">
+                  <option value="subscription">Subscription Credits</option>
+                  <option value="purchased">Purchased Credits</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Amount</label>
+                <input id="credit-amount" type="number" min="1" value="100"
+                  class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-rose-500" />
+              </div>
+            </div>
+
+            <div id="credit-msg" class="hidden px-4 py-3 rounded-lg text-sm"></div>
+
+            <button onclick="addCredits()" class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-xl transition-all active:scale-95">
+              Add Credits
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Photo Lightbox ══ -->
+  <div id="lightbox" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0" onclick="closeLightbox()"></div>
+    <div class="relative flex items-center justify-center h-full p-4">
+      <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white/60 hover:text-white text-3xl z-10">&times;</button>
+      <img id="lightbox-img" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl" src="" alt="Generated photo" />
+    </div>
+  </div>
+
+  <script type="module">
+    import { adminFetch, getAdminToken, logoutAdmin } from "/js/admin.js";
+
+    // ─── State ──────────────────────────────────────────────
+    let currentFilter = "all";
+    let currentPage = 1;
+    let currentUserId = null;
+    let userCache = {}; // userId -> detail data
+
+    // ─── Expose globals for inline onclick handlers ─────────
+    window.logoutAdmin = logoutAdmin;
+    window.currentUserId = null;
+
+    window.loadUsers = loadUsers;
+    window.changePage = changePage;
+    window.openUserDetail = openUserDetail;
+    window.closeModal = closeModal;
+    window.loadUserPhotos = loadUserPhotos;
+    window.addCredits = addCredits;
+    window.openLightbox = openLightbox;
+    window.closeLightbox = closeLightbox;
+
+    // ─── Init ───────────────────────────────────────────────
+    if (!getAdminToken()) {
+      window.location.href = "/admin.html";
+    } else {
+      loadStats();
+      loadUsers();
+      initClock();
+    }
+
+    // ─── Clock ──────────────────────────────────────────────
+    function initClock() {
+      function tick() {
+        document.getElementById("clock").textContent = new Date().toLocaleString();
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // ─── Load Stats ─────────────────────────────────────────
+    async function loadStats() {
+      try {
+        const data = await adminFetch("/stats");
+        document.getElementById("stat-total-users").textContent = data.totalUsers;
+        document.getElementById("stat-subscribed").textContent = data.subscribedUsers;
+        document.getElementById("stat-pending").textContent = data.pendingUploads;
+        document.getElementById("stat-uploaders").textContent = data.totalUploaders;
+        document.getElementById("stat-revenue").textContent = `$${data.totalRevenueFormatted}`;
+        document.getElementById("stat-credits").textContent = data.totalCredits;
+      } catch (err) {
+        console.error("Failed to load stats:", err);
+      }
+    }
+
+    // ─── Load Users ─────────────────────────────────────────
+    async function loadUsers() {
+      const tbody = document.getElementById("users-tbody");
+      tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-gray-500">Loading…</td></tr>`;
+
+      const search = document.getElementById("search-input").value.trim();
+      let url = `/users?filter=${currentFilter}&page=${currentPage}&limit=50`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+
+      try {
+        const data = await adminFetch(url);
+        renderUsers(data.users || []);
+        renderPagination(data.total, data.page, data.totalPages);
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-red-400">Error: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById("users-tbody");
+
+      if (!users.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-12 text-center text-gray-500">No users found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => {
+        const statusBadge = u.subscription_status === "active"
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-900/50 text-emerald-300 text-xs rounded-full border border-emerald-800"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>Active</span>`
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-800 text-gray-400 text-xs rounded-full border border-gray-700">Inactive</span>`;
+
+        const pendingIcon = u.hasPendingUpload
+          ? `<span class="text-amber-400" title="Has pending upload">⚠️</span>`
+          : ``;
+
+        const uploadedIcon = u.hasPaidUpload || u.uploadCount > 0
+          ? `<span class="text-sky-400" title="Has uploaded">📤</span>`
+          : `<span class="text-gray-600">—</span>`;
+
+        return `<tr class="border-t border-gray-800 hover:bg-gray-800/30 transition-colors cursor-pointer" onclick="openUserDetail('${u.id}')">
+          <td class="px-4 py-3 text-gray-200">${escapeHtml(u.email || '—')}</td>
+          <td class="px-4 py-3 text-gray-300">${escapeHtml(u.full_name || '—')}</td>
+          <td class="px-4 py-3">${statusBadge} ${pendingIcon}</td>
+          <td class="px-4 py-3 text-gray-300">${(u.subscription_credits || 0) + (u.purchased_credits || 0)}</td>
+          <td class="px-4 py-3">${uploadedIcon} ${u.uploadCount || 0}</td>
+          <td class="px-4 py-3 text-gray-300">${u.generatedPhotoCount || 0}</td>
+          <td class="px-4 py-3 text-gray-400 text-xs">${formatDate(u.created_at)}</td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="event.stopPropagation(); openUserDetail('${u.id}')" class="text-xs text-rose-400 hover:text-rose-300 transition-colors">View</button>
+          </td>
+        </tr>`;
+      }).join("");
+    }
+
+    function renderPagination(total, page, totalPages) {
+      const el = document.getElementById("pagination");
+      if (totalPages <= 1) {
+        el.classList.add("hidden");
+        return;
+      }
+      el.classList.remove("hidden");
+      document.getElementById("page-info").textContent = `Page ${page} of ${totalPages} (${total} users)`;
+      document.getElementById("prev-page").disabled = page <= 1;
+      document.getElementById("next-page").disabled = page >= totalPages;
+    }
+
+    window.changePage = function (delta) {
+      currentPage = Math.max(1, currentPage + delta);
+      loadUsers();
+    };
+
+    // ─── Filter buttons ─────────────────────────────────────
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => {
+          b.classList.remove("bg-rose-600", "text-white");
+          b.classList.add("text-gray-400", "hover:text-white", "hover:bg-gray-800");
+        });
+        btn.classList.add("bg-rose-600", "text-white");
+        btn.classList.remove("text-gray-400", "hover:text-white", "hover:bg-gray-800");
+
+        currentFilter = btn.dataset.filter;
+        currentPage = 1;
+        loadUsers();
+      });
+    });
+
+    // ─── Search on Enter ────────────────────────────────────
+    document.getElementById("search-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        currentPage = 1;
+        loadUsers();
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    // ─── User Detail Modal ──────────────────────────────────
+    // ═══════════════════════════════════════════════════════════
+    async function openUserDetail(userId) {
+      currentUserId = userId;
+      window.currentUserId = userId;
+      document.getElementById("user-modal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+
+      // Reset tabs
+      document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+      document.getElementById("tab-profile").classList.remove("hidden");
+      document.querySelectorAll(".tab-btn").forEach(b => {
+        b.classList.remove("bg-rose-600", "text-white");
+        b.classList.add("text-gray-400");
+      });
+      document.querySelector('[data-tab="profile"]').classList.add("bg-rose-600", "text-white");
+      document.querySelector('[data-tab="profile"]').classList.remove("text-gray-400");
+
+      try {
+        const data = await adminFetch(`/users/${userId}`);
+        userCache[userId] = data;
+        renderUserDetail(data);
+      } catch (err) {
+        document.getElementById("modal-user-name").textContent = "Error loading user";
+        document.getElementById("modal-user-email").textContent = err.message;
+      }
+    }
+
+    window.closeModal = function () {
+      document.getElementById("user-modal").classList.add("hidden");
+      document.body.style.overflow = "";
+      currentUserId = null;
+    };
+
+    function renderUserDetail(data) {
+      const p = data.profile;
+      document.getElementById("modal-user-name").textContent = p.full_name || "Unknown User";
+      document.getElementById("modal-user-email").textContent = p.email || "No email";
+      document.getElementById("detail-user-id").textContent = p.id;
+      document.getElementById("detail-gender").textContent = p.gender || "—";
+      document.getElementById("detail-plan").textContent = p.plan || "free";
+      document.getElementById("detail-sub-status").innerHTML = p.subscription_status === "active"
+        ? '<span class="text-emerald-400 font-medium">Active</span>'
+        : '<span class="text-gray-400">' + (p.subscription_status || 'inactive') + '</span>';
+      document.getElementById("detail-sub-credits").textContent = p.subscription_credits || 0;
+      document.getElementById("detail-pur-credits").textContent = p.purchased_credits || 0;
+      document.getElementById("detail-total-credits").textContent = data.totalCredits;
+      document.getElementById("detail-photo-count").textContent = data.generatedPhotoCount;
+      document.getElementById("detail-created").textContent = formatDate(p.created_at);
+      document.getElementById("detail-updated").textContent = formatDate(p.updated_at);
+
+      // ── Uploads ──
+      const uploadsEl = document.getElementById("uploads-list");
+      if (data.uploads.length === 0) {
+        uploadsEl.innerHTML = '<p class="text-gray-500 text-sm">No uploads found.</p>';
+      } else {
+        uploadsEl.innerHTML = data.uploads.map(u => `
+          <div class="bg-gray-800/50 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-200 font-medium">${u.id}</div>
+              <div class="text-xs text-gray-500 mt-0.5">${u.photo_count} photos · ${formatDate(u.created_at)}</div>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full ${u.status === 'paid' ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-800' : u.status === 'pending_payment' ? 'bg-amber-900/50 text-amber-300 border border-amber-800' : 'bg-gray-800 text-gray-400 border border-gray-700'}">${u.status}</span>
+          </div>
+        `).join("");
+      }
+
+      // ── Training Jobs ──
+      const trainingEl = document.getElementById("training-list");
+      if (data.trainingJobs.length === 0) {
+        trainingEl.innerHTML = '<p class="text-gray-500 text-sm">No training jobs found.</p>';
+      } else {
+        trainingEl.innerHTML = data.trainingJobs.map(j => {
+          const statusColors = {
+            completed: 'bg-emerald-900/50 text-emerald-300 border-emerald-800',
+            training: 'bg-sky-900/50 text-sky-300 border-sky-800',
+            pending: 'bg-amber-900/50 text-amber-300 border-amber-800',
+            failed: 'bg-red-900/50 text-red-300 border-red-800',
+          };
+          const sc = statusColors[j.status] || 'bg-gray-800 text-gray-400 border-gray-700';
+          return `<div class="bg-gray-800/50 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-sm text-gray-200 font-medium">Job: ${j.id}</div>
+              <span class="px-2 py-1 text-xs rounded-full ${sc} border">${j.status}</span>
+            </div>
+            <div class="text-xs text-gray-500">${j.trigger_word ? 'Trigger: ' + j.trigger_word : ''} ${j.lora_url ? '· LoRA ready' : ''} · ${j.steps || '?'} steps · ${formatDate(j.created_at)}</div>
+          </div>`;
+        }).join("");
+      }
+
+      // ── Orders ──
+      const ordersEl = document.getElementById("orders-list");
+      if (data.orders.length === 0) {
+        ordersEl.innerHTML = '<p class="text-gray-500 text-sm">No orders found.</p>';
+      } else {
+        ordersEl.innerHTML = data.orders.map(o => `
+          <div class="bg-gray-800/50 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <div class="text-sm text-gray-200">${o.plan || 'Subscription'} · $${((o.amount || 0) / 100).toFixed(2)}</div>
+              <div class="text-xs text-gray-500 mt-0.5">${formatDate(o.created_at)}</div>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full ${o.status === 'paid' ? 'bg-emerald-900/50 text-emerald-300 border-emerald-800' : o.status === 'refunded' ? 'bg-red-900/50 text-red-300 border-red-800' : 'bg-amber-900/50 text-amber-300 border-amber-800'} border">${o.status}</span>
+          </div>
+        `).join("");
+      }
+
+      // ── Photos ──
+      loadUserPhotos(userId);
+    }
+
+    async function loadUserPhotos(userId) {
+      const grid = document.getElementById("photos-grid");
+      const countEl = document.getElementById("photos-count");
+      grid.innerHTML = '<p class="text-gray-500 text-sm col-span-full">Loading photos…</p>';
+
+      try {
+        const data = await adminFetch(`/users/${userId}/photos`);
+        const photos = data.photos || [];
+        countEl.textContent = `${photos.length} photo(s)`;
+
+        if (photos.length === 0) {
+          grid.innerHTML = '<p class="text-gray-500 text-sm col-span-full">No generated photos yet.</p>';
+          return;
+        }
+
+        grid.innerHTML = photos.map(p => `
+          <div class="group relative bg-gray-800 rounded-xl overflow-hidden aspect-square cursor-pointer" onclick="openLightbox('${escapeHtml(p.signedUrl)}')">
+            <img src="${escapeHtml(p.signedUrl)}" alt="Generated photo" loading="lazy"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+              <span class="text-xs text-white font-medium">${p.style || 'unknown'}</span>
+            </div>
+          </div>
+        `).join("");
+      } catch (err) {
+        grid.innerHTML = `<p class="text-red-400 text-sm col-span-full">Error: ${err.message}</p>`;
+      }
+    }
+
+    // ─── Tab switching in modal ─────────────────────────────
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => {
+          b.classList.remove("bg-rose-600", "text-white");
+          b.classList.add("text-gray-400");
+        });
+        btn.classList.add("bg-rose-600", "text-white");
+        btn.classList.remove("text-gray-400");
+
+        document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.remove("hidden");
+
+        // If switching to photos tab, reload
+        if (btn.dataset.tab === "photos" && currentUserId) {
+          loadUserPhotos(currentUserId);
+        }
+      });
+    });
+
+    // ─── Add Credits ────────────────────────────────────────
+    async function addCredits() {
+      const type = document.getElementById("credit-type").value;
+      const amount = parseInt(document.getElementById("credit-amount").value, 10);
+      const msgEl = document.getElementById("credit-msg");
+
+      msgEl.classList.add("hidden");
+
+      if (!amount || amount <= 0) {
+        showCreditMsg("Please enter a valid positive number.", "red");
+        return;
+      }
+
+      if (!currentUserId) {
+        showCreditMsg("No user selected.", "red");
+        return;
+      }
+
+      try {
+        const data = await adminFetch(`/users/${currentUserId}/credits`, {
+          method: "POST",
+          body: JSON.stringify({ type, amount }),
+        });
+
+        showCreditMsg(`✅ Added ${amount} ${type} credit(s). New balance: ${data[type === 'subscription' ? 'subscription_credits' : 'purchased_credits']}`, "green");
+
+        // Refresh user detail to update the displayed values
+        const detail = await adminFetch(`/users/${currentUserId}`);
+        userCache[currentUserId] = detail;
+        renderUserDetail(detail);
+      } catch (err) {
+        showCreditMsg(`❌ ${err.message}`, "red");
+      }
+    }
+
+    function showCreditMsg(msg, type) {
+      const el = document.getElementById("credit-msg");
+      el.textContent = msg;
+      el.className = `px-4 py-3 rounded-lg text-sm ${type === 'green' ? 'bg-emerald-900/50 text-emerald-300 border border-emerald-800' : 'bg-red-900/50 text-red-300 border border-red-800'}`;
+      el.classList.remove("hidden");
+    }
+
+    // ─── Lightbox ───────────────────────────────────────────
+    window.openLightbox = function (url) {
+      document.getElementById("lightbox-img").src = url;
+      document.getElementById("lightbox").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    };
+
+    window.closeLightbox = function () {
+      document.getElementById("lightbox").classList.add("hidden");
+      document.body.style.overflow = "";
+    };
+
+    // ─── Utilities ──────────────────────────────────────────
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const d = new Date(dateStr);
+      return d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>').replace(/"/g, '"');
+    }
+
+    // ─── Keyboard: Escape to close modal ───────────────────
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+        closeLightbox();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ import trainingRouter from "./routes/training.js";
 import photosRouter from "./routes/photos.js";
 import stripeRouter from "./routes/stripe.js";
 import uploadRouter from "./routes/upload.js";
+import adminRouter from "./routes/admin.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -95,6 +96,9 @@ app.use("/api/photos", photosRouter);
 
 // Stripe routes
 app.use("/api/stripe", stripeRouter);
+
+// Admin routes (password-protected dashboard)
+app.use("/api/admin", adminRouter);
 
 app.listen(PORT, () => {
   console.log(`✨ HaloProfile server listening on http://localhost:${PORT}`);
